@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
+import 'package:solution_beatfighter/System/AppData.dart';
 
 class TestScreen extends StatefulWidget {
   TestScreen({super.key});
@@ -13,9 +15,9 @@ class TestScreen extends StatefulWidget {
 }
 
 class _TestScreenState extends State<TestScreen> {
-  int ratio_Header = 1;
+  int ratio_Header = 2;
   int ratio_Body = 7;
-  int ratio_Footer = 3;
+  int ratio_Footer = 2;
 
   @override
   void initState() {
@@ -58,6 +60,7 @@ class _TestScreenState extends State<TestScreen> {
 
   Widget Body() {
     final player = BFCore().notePlayer;
+    double buttonSize = AppData().utilScreen.Screen(context).width * 0.15;
     return Expanded(
         flex: ratio_Body,
         child: Container(
@@ -65,12 +68,69 @@ class _TestScreenState extends State<TestScreen> {
           width: double.maxFinite,
           height: double.maxFinite,
           color: Colors.greenAccent,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: 30,
-            itemBuilder: (context, index) {
-              return ListTile(title: Text("$index"),);
-            },),
+          child: Container(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: 30,
+              itemBuilder: (context, index) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Container(
+                            padding: EdgeInsets.all(2.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(child: Text("$index"), onPressed: () {}),
+                              ],
+                            ))),
+                    Expanded(
+                        flex: 3,
+                        child: Container(
+                            padding: EdgeInsets.all(5.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Bgm"), onPressed: () {})),
+                              ],
+                            ))),
+                    Expanded(
+                        flex: 5,
+                        child: Container(
+                          padding: EdgeInsets.all(5.0),
+                          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                            SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Note A"), onPressed: () {})),
+                            SizedBox(width: 10),
+                            SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Note B"), onPressed: () {})),
+                          ]),
+                        )),
+                    Expanded(
+                        flex: 3,
+                        child: Container(
+                            padding: EdgeInsets.all(5.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Event"), onPressed: () {})),
+                              ],
+                            ))),
+                    Expanded(
+                        flex: 2,
+                        child: Container(
+                            padding: EdgeInsets.all(5.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(child: Text("Script"), onPressed: () {}),
+                              ],
+                            ))),
+                  ],
+                );
+              },
+            ),
+          ),
         ));
   }
 
@@ -86,7 +146,6 @@ class _TestScreenState extends State<TestScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Text(player.get_PlayTime_inFormat()),
-              Text("Time : ${BFCore().notePlayer.Timertime()}"),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
