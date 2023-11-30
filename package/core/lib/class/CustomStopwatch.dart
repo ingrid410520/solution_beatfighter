@@ -27,7 +27,7 @@ class CustomStopwatch {
     timer.cancel();
   }
 
-  void reset() {
+  void stop() {
     _elapsedTime = Duration.zero;
   }
 
@@ -35,7 +35,7 @@ class CustomStopwatch {
     if (elapsedTime - duration >= Duration.zero) {
       _elapsedTime -= duration;
     } else {
-      reset();
+      stop();
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:package_beatfighter/class/NoteScript.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 import 'package:solution_beatfighter/System/AppData.dart';
 
@@ -13,6 +14,8 @@ class TestScreen extends StatefulWidget {
   @override
   State<TestScreen> createState() => _TestScreenState();
 }
+
+var _ScrollController = ScrollController();
 
 class _TestScreenState extends State<TestScreen> {
   int ratio_Header = 2;
@@ -60,7 +63,12 @@ class _TestScreenState extends State<TestScreen> {
 
   Widget Body() {
     final player = BFCore().notePlayer;
-    double buttonSize = AppData().utilScreen.Screen(context).width * 0.15;
+    double buttonSize = AppData().utilScreen.Screen(context).width * 0.13;
+    double buttonSize1 = AppData().utilScreen.Screen(context).width * 0.08;
+    int ratio_sec = 2;
+    int ratio_small = 2;
+    int ratio_middle = 3;
+    int ratio_big = 5;
     return Expanded(
         flex: ratio_Body,
         child: Container(
@@ -71,67 +79,125 @@ class _TestScreenState extends State<TestScreen> {
           child: Container(
             child: ListView.builder(
               shrinkWrap: true,
+              controller: _ScrollController,
               itemCount: 30,
               itemBuilder: (context, index) {
+                int sec = index * 100;
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Expanded(
-                        flex: 1,
-                        child: Container(
-                            padding: EdgeInsets.all(2.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ElevatedButton(child: Text("$index"), onPressed: () {}),
-                              ],
-                            ))),
-                    Expanded(
-                        flex: 3,
-                        child: Container(
-                            padding: EdgeInsets.all(5.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Bgm"), onPressed: () {})),
-                              ],
-                            ))),
-                    Expanded(
-                        flex: 5,
-                        child: Container(
-                          padding: EdgeInsets.all(5.0),
-                          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                            SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Note A"), onPressed: () {})),
-                            SizedBox(width: 10),
-                            SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Note B"), onPressed: () {})),
-                          ]),
-                        )),
-                    Expanded(
-                        flex: 3,
-                        child: Container(
-                            padding: EdgeInsets.all(5.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Event"), onPressed: () {})),
-                              ],
-                            ))),
-                    Expanded(
-                        flex: 2,
-                        child: Container(
-                            padding: EdgeInsets.all(5.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ElevatedButton(child: Text("Script"), onPressed: () {}),
-                              ],
-                            ))),
+                    Note_sec(ratio_sec, buttonSize1, sec, () {}),
+                    Note_bgm(ratio_middle, buttonSize, sec, () {}),
+                    Note_AB(ratio_big, buttonSize, sec, () {
+                      setState(() {
+                        player.insertNoteScript(NoteScript(sec: sec, noteA: true));
+                      });
+                    }, () {
+                      setState(() {
+                        player.insertNoteScript(NoteScript(sec: sec, noteB: true));
+                      });
+                    }),
+                    Note_Event(ratio_middle, buttonSize, sec, () {}),
+                    Note_subTitle(ratio_small, sec, () {}),
                   ],
                 );
               },
             ),
           ),
         ));
+  }
+
+  Widget Note_sec(int ratio_sec, double buttonSize1, int sec, Null function()) {
+    return Expanded(
+        flex: ratio_sec,
+        child: Container(
+            padding: EdgeInsets.all(2.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(width: buttonSize1, child: ElevatedButton(child: Text("$sec"), onPressed: function)),
+              ],
+            )));
+  }
+
+  Widget Note_bgm(int ratio_middle, double buttonSize, sec, Null function()) {
+    return Expanded(
+        flex: ratio_middle,
+        child: Container(
+            padding: EdgeInsets.all(5.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Bgm"), onPressed: function)),
+              ],
+            )));
+  }
+
+  Expanded Note_AB(int ratio_big, double buttonSize, sec, Null functionA(), Null functionB()) {
+    NoteScript? script = BFCore().notePlayer.get_NoteScript(sec);
+    bool checkA = false;
+    bool checkB = false;
+    int time = BFCore().notePlayer.get_PlayTime();
+
+    if (script != null) {
+      if (script.noteA != null) checkA = script.noteA!;
+      if (script.noteB != null) checkB = script.noteB!;
+    }
+
+    Color colorA = (sec < time)
+        ? (checkA ? AppData().color.Note_after_Filled : AppData().color.Note_after_Empty)
+        : (checkA ? AppData().color.Note_before_Filled : AppData().color.Note_before_Empty);
+
+    Color colorB = (sec < time)
+        ? (checkB ? AppData().color.Note_after_Filled : AppData().color.Note_after_Empty)
+        : (checkB ? AppData().color.Note_before_Filled : AppData().color.Note_before_Empty);
+
+    return Expanded(
+        flex: ratio_big,
+        child: Container(
+          padding: EdgeInsets.all(5.0),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Container(
+                width: buttonSize,
+                child: ElevatedButton(
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(colorA)),
+                    child: Text("Note A"),
+                    onPressed: functionA)),
+            SizedBox(width: 10),
+            Container(
+                width: buttonSize,
+                child: ElevatedButton(
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(colorB)),
+                    child: Text("Note B"),
+                    onPressed: functionB)),
+          ]),
+        ));
+  }
+
+  Expanded Note_Event(int ratio_middle, double buttonSize, sec, Null function()) {
+    return Expanded(
+        flex: ratio_middle,
+        child: Container(
+            padding: EdgeInsets.all(5.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Event"), onPressed: function)),
+              ],
+            )));
+  }
+
+  Expanded Note_subTitle(int ratio_small, sec, Null function()) {
+    return Expanded(
+        flex: ratio_small,
+        child: Container(
+            padding: EdgeInsets.all(5.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(child: Text("SubTitle"), onPressed: function),
+              ],
+            )));
   }
 
   Widget Footer() {
@@ -145,7 +211,7 @@ class _TestScreenState extends State<TestScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text(player.get_PlayTime_inFormat()),
+              Text(player.get_PlayTime_inFormat() + "   ms : " + player.get_PlayTime().toString()),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -161,7 +227,7 @@ class _TestScreenState extends State<TestScreen> {
                       child: Text("Pause")),
                   OutlinedButton(
                       onPressed: () {
-                        player.resetTimer();
+                        player.stopTimer();
                       },
                       child: Text("Stop")),
                 ],
