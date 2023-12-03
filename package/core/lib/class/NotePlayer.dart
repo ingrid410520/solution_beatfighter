@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:package_beatfighter/class/CustomStopwatch.dart';
 import 'package:package_beatfighter/class/NoteScript.dart';
 
+int _initScriptLength = 5000;
+
 enum NotePlayerState {
   Play,
   Pause,
@@ -14,7 +16,7 @@ class NotePlayer {
   NotePlayerState _state = NotePlayerState.Stop;
 
   Map<int, NoteScript> mapNoteScript = Map<int, NoteScript>();
-  int _noteScriptLength = 0;
+  int _noteScriptLength = _initScriptLength;
 
   CustomStopwatch timer = CustomStopwatch();
   int skiptime = 5000;
@@ -23,15 +25,7 @@ class NotePlayer {
 
   void set_PlayerState(NotePlayerState _State) => _state = _State;
 
-  int get_PlayTimeLength() {
-    if (_noteScriptLength == 0) {
-      if (mapNoteScript.isNotEmpty) {
-        _noteScriptLength = mapNoteScript.keys.last + 1;
-      }
-    }
-
-    return _noteScriptLength;
-  }
+  int get_NoteScriptLength() => _noteScriptLength;
 
   int get_PlayTime() => timer.elapsedTime.inMilliseconds;
 

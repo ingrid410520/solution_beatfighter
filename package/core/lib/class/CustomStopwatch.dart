@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:package_beatfighter/class/NotePlayer.dart';
+import 'package:package_beatfighter/package_beatfighter.dart';
+
 class CustomStopwatch {
   late Timer timer;
   DateTime? _previousTime;
@@ -28,7 +31,14 @@ class CustomStopwatch {
   }
 
   void stop() {
+    timer.cancel();
     _elapsedTime = Duration.zero;
+  }
+
+  void complete() {
+    BFCore().notePlayer.set_PlayerState(NotePlayerState.Complete);
+    timer.cancel();
+    _elapsedTime = Duration(milliseconds: BFCore().notePlayer.get_NoteScriptLength());
   }
 
   void rewind(Duration duration) {
@@ -40,7 +50,11 @@ class CustomStopwatch {
   }
 
   void forward(Duration duration) {
-    _elapsedTime += duration;
+    if (elapsedTime.inMilliseconds + duration.inMilliseconds >= BFCore().notePlayer.get_NoteScriptLength()) {
+      complete();
+    } else {
+      _elapsedTime += duration;
+    }
   }
 
   void _updateTime() {
@@ -48,5 +62,9 @@ class CustomStopwatch {
     final frameTime = now.difference(_previousTime!);
     _elapsedTime += frameTime * _speed; // 수정된 부분
     _previousTime = now;
+
+    if (BFCore().notePlayer.get_NoteScriptLength() <= BFCore().notePlayer.get_PlayTime()) {
+      complete();
+    }
   }
 }

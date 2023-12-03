@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:package_beatfighter/class/NotePlayer.dart';
 import 'package:package_beatfighter/class/NoteScript.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 import 'package:solution_beatfighter/System/AppData.dart';
@@ -16,6 +17,7 @@ class TestScreen extends StatefulWidget {
 }
 
 var _ScrollController = ScrollController();
+bool scrollInit = false;
 
 class _TestScreenState extends State<TestScreen> {
   int ratio_Header = 2;
@@ -31,6 +33,7 @@ class _TestScreenState extends State<TestScreen> {
   void dispose() {
     super.dispose();
     widget.timer.cancel();
+    _ScrollController.dispose();
   }
 
   @override
@@ -69,6 +72,8 @@ class _TestScreenState extends State<TestScreen> {
     int ratio_small = 2;
     int ratio_middle = 3;
     int ratio_big = 5;
+    int seperated = 100;
+    int count = (BFCore().notePlayer.get_NoteScriptLength() * 0.01).toInt();
     return Expanded(
         flex: ratio_Body,
         child: Container(
@@ -80,13 +85,19 @@ class _TestScreenState extends State<TestScreen> {
             child: ListView.builder(
               shrinkWrap: true,
               controller: _ScrollController,
-              itemCount: 30,
+              itemCount: count,
               itemBuilder: (context, index) {
-                int sec = index * 100;
+                int sec = index * seperated;
+                _ScrollController.addListener(() {
+                  //print('현재 스크롤 위치: ${_ScrollController.offset}');
+                });
+
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Note_sec(ratio_sec, buttonSize1, sec, () {}),
+                    Note_sec(ratio_sec, buttonSize1, sec, () {
+                      _ScrollController.animateTo(getScrollpos(player), duration: Duration(milliseconds: 5), curve: Curves.easeInOut);
+                    }),
                     Note_bgm(ratio_middle, buttonSize, sec, () {}),
                     Note_AB(ratio_big, buttonSize, sec, () {
                       setState(() {
@@ -107,7 +118,25 @@ class _TestScreenState extends State<TestScreen> {
         ));
   }
 
+  double getScrollpos(NotePlayer player) {
+    double scrollMax = _ScrollController.position.maxScrollExtent;
+    int noteMax = player.get_NoteScriptLength();
+    int now = player.get_PlayTime() + 100;
+    double pos = scrollMax * now / noteMax;
+    return pos;
+  }
+
   Widget Note_sec(int ratio_sec, double buttonSize1, int sec, Null function()) {
+    int time = BFCore().notePlayer.get_PlayTime();
+    Color colorA = (sec < time) ? AppData().color.Note_after_Empty : AppData().color.Note_before_Empty;
+
+    if (BFCore().notePlayer.get_PlayerState() == NotePlayerState.Play) {
+      int cc = sec % 1000;
+      if (cc == 0) {
+        function();
+      }
+    }
+
     return Expanded(
         flex: ratio_sec,
         child: Container(
@@ -115,7 +144,12 @@ class _TestScreenState extends State<TestScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(width: buttonSize1, child: ElevatedButton(child: Text("$sec"), onPressed: function)),
+                SizedBox(
+                    width: buttonSize1,
+                    child: ElevatedButton(
+                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(colorA)),
+                        child: Text("$sec"),
+                        onPressed: function)),
               ],
             )));
   }
