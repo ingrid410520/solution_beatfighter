@@ -14,10 +14,8 @@ enum NotePlayerState {
 
 class NotePlayer {
   NotePlayerState _state = NotePlayerState.Stop;
-
   Map<int, NoteScript> mapNoteScript = Map<int, NoteScript>();
   int _noteScriptLength = _initScriptLength;
-
   CustomStopwatch timer = CustomStopwatch();
   int skiptime = 5000;
 
@@ -26,6 +24,10 @@ class NotePlayer {
   void set_PlayerState(NotePlayerState _State) => _state = _State;
 
   int get_NoteScriptLength() => _noteScriptLength;
+
+  void set_NoteScriptLength(int length) {
+    if (length > 0) _noteScriptLength = length;
+  }
 
   int get_PlayTime() => timer.elapsedTime.inMilliseconds;
 
@@ -55,6 +57,25 @@ class NotePlayer {
     return '$minutesStr:$secondsStr.$millisecondsStr';
   }
 
+  Map get_NoteScript() {
+    var sortedByKeyMap = Map.fromEntries(mapNoteScript.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
+
+    return sortedByKeyMap;
+  }
+
+  NoteScript get_NoteScriptFromIndex(int index) {
+    var sortedByKeyMap = Map.fromEntries(mapNoteScript.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
+
+    var key = sortedByKeyMap.keys.toList()[index];
+    var value = get_NoteScriptFromSec(key)!;
+
+    return value;
+  }
+
+  NoteScript? get_NoteScriptFromSec(int sec) {
+    if (mapNoteScript.containsKey(sec)) return mapNoteScript[sec];
+  }
+
   void insertNoteScript(NoteScript script) {
     if (mapNoteScript.containsKey(script.sec)) {
       NoteScript before = mapNoteScript[script.sec]!;
@@ -62,10 +83,6 @@ class NotePlayer {
     } else {
       mapNoteScript[script.sec] = script;
     }
-  }
-
-  NoteScript? get_NoteScript(int sec) {
-    if (mapNoteScript.containsKey(sec)) return mapNoteScript[sec];
   }
 
   void modifyNoteScript() {}

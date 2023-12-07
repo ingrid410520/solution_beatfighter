@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 import 'package:solution_beatfighter/System/AppData.dart';
-import 'package:solution_beatfighter/scene/testscreen.dart';
+import 'package:solution_beatfighter/scene/checkNote.dart';
+import 'package:solution_beatfighter/scene/testEditor.dart';
+import 'package:solution_beatfighter/scene/testScreen.dart';
 
 void main() {
   return runApp(MyApp());
@@ -21,7 +23,12 @@ class _MyAppState extends State<MyApp> {
       color: Colors.black,
       debugShowCheckedModeBanner: false,
       title: AppData().string.strTitle_SolutionApp,
-      home: TestScreen(),
+      initialRoute: "testEditor",
+      routes: {
+        "testScreen" : (context) => testScreen(),
+        "testEditor" : (context) => testEditor(),
+        "testPlay" : (context) => testScreen(),
+      },
     );
   }
 }

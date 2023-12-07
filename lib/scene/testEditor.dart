@@ -2,31 +2,42 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_advanced_segment/flutter_advanced_segment.dart';
 import 'package:package_beatfighter/class/NotePlayer.dart';
 import 'package:package_beatfighter/class/NoteScript.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 import 'package:solution_beatfighter/System/AppData.dart';
+import 'package:solution_beatfighter/scene/checkNote.dart';
 
-class TestScreen extends StatefulWidget {
-  TestScreen({super.key});
+int seperated = 100;
+TextEditingController teSeperated = TextEditingController(text: seperated.toString());
+TextEditingController teLength = TextEditingController(text: BFCore().notePlayer.get_NoteScriptLength().toString());
+
+class testEditor extends StatefulWidget {
+  testEditor({super.key});
 
   late Timer timer;
 
   @override
-  State<TestScreen> createState() => _TestScreenState();
+  State<testEditor> createState() => _testEditorState();
 }
 
-var _ScrollController = ScrollController();
-bool scrollInit = false;
-
-class _TestScreenState extends State<TestScreen> {
+class _testEditorState extends State<testEditor> {
   int ratio_Header = 2;
   int ratio_Body = 7;
   int ratio_Footer = 2;
+  var _ScrollController = ScrollController();
+
+  String _UIselectedBgm = BFCore().noteOption.get_OptionKey_Bgm[0];
+  final _UIselectedNote = ValueNotifier(BFCore().noteOption.get_OptionKeyIndex_Note(0));
 
   @override
   void initState() {
     super.initState();
+    if (mounted) {
+      update();
+    }
   }
 
   @override
@@ -38,9 +49,15 @@ class _TestScreenState extends State<TestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    update();
+    //update();
     return Scaffold(
-      appBar: AppBar(title: Text("Test Page")),
+      appBar: AppBar(
+          title: Text("Test Page"),
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, "testScreen");
+              },
+              icon: Icon(Icons.home))),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -60,7 +77,96 @@ class _TestScreenState extends State<TestScreen> {
         child: Container(
           width: double.maxFinite,
           height: double.maxFinite,
-          color: Colors.pinkAccent,
+          color: AppData().color.EditorBG_Header,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(onPressed: () {}, child: Text("Save")),
+                  ElevatedButton(onPressed: () {}, child: Text("Load")),
+                  Text("Filename"),
+                  SizedBox(
+                    width: 150,
+                    height: 35,
+                    child: TextField(
+                      controller: teLength,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (value) {
+                        teLength.text = value;
+                      },
+                      decoration: InputDecoration(
+                          label: Text("Note Length"),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  BFCore().notePlayer.set_NoteScriptLength(int.parse(teLength.text));
+                                });
+                              },
+                              icon: Icon(Icons.input))),
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return checkNote();
+                          },
+                        );
+                      },
+                      child: Text("Check Note"))
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  SizedBox(
+                    width: 150,
+                    height: 35,
+                    child: TextField(
+                      controller: teSeperated,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (value) {
+                        teSeperated.text = value;
+                      },
+                      decoration: InputDecoration(
+                          label: Text("Seperated"),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                          suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  seperated = int.parse(teSeperated.text);
+                                });
+                              },
+                              icon: Icon(Icons.input))),
+                    ),
+                  ),
+                  DropdownButton(
+                    items: List.generate(
+                        BFCore().noteOption.mapBgmOption.length,
+                        (index) => DropdownMenuItem(
+                            value: BFCore().noteOption.get_OptionKey_Bgm[index],
+                            child: Text(BFCore().noteOption.get_OptionKey_Bgm[index]))),
+                    value: _UIselectedBgm,
+                    onChanged: (value) {
+                      _UIselectedBgm = value.toString();
+                    },
+                  ),
+                  AdvancedSegment(
+                    segments: BFCore().noteOption.mapNoteOption,
+                    controller: _UIselectedNote,
+                  ),
+                  Text("Event"),
+                  Text("Subtitle"),
+                ],
+              ),
+            ],
+          ),
         ));
   }
 
@@ -72,15 +178,14 @@ class _TestScreenState extends State<TestScreen> {
     int ratio_small = 2;
     int ratio_middle = 3;
     int ratio_big = 5;
-    int seperated = 100;
-    int count = (BFCore().notePlayer.get_NoteScriptLength() * 0.01).toInt();
+    int count = (BFCore().notePlayer.get_NoteScriptLength() ~/ seperated).toInt();
     return Expanded(
         flex: ratio_Body,
         child: Container(
           padding: EdgeInsets.all(3),
           width: double.maxFinite,
           height: double.maxFinite,
-          color: Colors.greenAccent,
+          color: AppData().color.EditorBG_Body,
           child: Container(
             child: ListView.builder(
               shrinkWrap: true,
@@ -96,7 +201,8 @@ class _TestScreenState extends State<TestScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Note_sec(ratio_sec, buttonSize1, sec, () {
-                      _ScrollController.animateTo(getScrollpos(player), duration: Duration(milliseconds: 5), curve: Curves.easeInOut);
+                      _ScrollController.animateTo(getScrollpos(player),
+                          duration: Duration(milliseconds: 5), curve: Curves.easeInOut);
                     }),
                     Note_bgm(ratio_middle, buttonSize, sec, () {}),
                     Note_AB(ratio_big, buttonSize, sec, () {
@@ -121,8 +227,11 @@ class _TestScreenState extends State<TestScreen> {
   double getScrollpos(NotePlayer player) {
     double scrollMax = _ScrollController.position.maxScrollExtent;
     int noteMax = player.get_NoteScriptLength();
-    int now = player.get_PlayTime() + 100;
-    double pos = scrollMax * now / noteMax;
+    int now = player.get_PlayTime();
+
+    double cali = noteMax * 0.01;
+    double pos = (scrollMax * now + cali) / noteMax;
+
     return pos;
   }
 
@@ -168,7 +277,7 @@ class _TestScreenState extends State<TestScreen> {
   }
 
   Expanded Note_AB(int ratio_big, double buttonSize, sec, Null functionA(), Null functionB()) {
-    NoteScript? script = BFCore().notePlayer.get_NoteScript(sec);
+    NoteScript? script = BFCore().notePlayer.get_NoteScriptFromSec(sec);
     bool checkA = false;
     bool checkB = false;
     int time = BFCore().notePlayer.get_PlayTime();
@@ -241,7 +350,7 @@ class _TestScreenState extends State<TestScreen> {
         child: Container(
           width: double.maxFinite,
           height: double.maxFinite,
-          color: Colors.lightBlueAccent,
+          color: AppData().color.EditorBG_Footer,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -274,7 +383,9 @@ class _TestScreenState extends State<TestScreen> {
   void update() {
     widget.timer = Timer.periodic(
       Duration(milliseconds: 200),
-      (timer) => setState(() {}),
+      (timer) {
+        setState(() {});
+      },
     );
   }
 }

@@ -1,5 +1,6 @@
 library package_beatfighter;
 
+import 'package:package_beatfighter/class/NoteOption.dart';
 import 'package:package_beatfighter/class/NotePlayer.dart';
 import 'package:package_beatfighter/class/NoteTable.dart';
 import 'package:package_beatfighter/class/ResourceContainer.dart';
@@ -15,4 +16,5 @@ class BFCore {
   NoteTable noteTable = NoteTable();
   ResourceContainer resourceContainer = ResourceContainer();
   NotePlayer notePlayer = NotePlayer();
+  NoteOption noteOption = NoteOption();
 }
