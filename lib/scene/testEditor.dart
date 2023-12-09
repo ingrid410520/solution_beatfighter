@@ -31,6 +31,8 @@ class _testEditorState extends State<testEditor> {
 
   String _UIselectedBgm = BFCore().noteOption.get_OptionKey_Bgm[0];
   final _UIselectedNote = ValueNotifier(BFCore().noteOption.get_OptionKeyIndex_Note(0));
+  String _UIselectedEventKey = BFCore().noteOption.setEventKeyOption.toList()[0];
+  String _UIselectedSubtitleKey = BFCore().noteOption.setSubtitleOption.toList()[0];
 
   @override
   void initState() {
@@ -148,10 +150,11 @@ class _testEditorState extends State<testEditor> {
                   ),
                   DropdownButton(
                     items: List.generate(
-                        BFCore().noteOption.mapBgmOption.length,
-                        (index) => DropdownMenuItem(
-                            value: BFCore().noteOption.get_OptionKey_Bgm[index],
-                            child: Text(BFCore().noteOption.get_OptionKey_Bgm[index]))),
+                        BFCore().noteOption.setBgmOption.length,
+                            (index) =>
+                            DropdownMenuItem(
+                                value: BFCore().noteOption.get_OptionKey_Bgm[index],
+                                child: Text(BFCore().noteOption.get_OptionKey_Bgm[index]))),
                     value: _UIselectedBgm,
                     onChanged: (value) {
                       _UIselectedBgm = value.toString();
@@ -161,8 +164,28 @@ class _testEditorState extends State<testEditor> {
                     segments: BFCore().noteOption.mapNoteOption,
                     controller: _UIselectedNote,
                   ),
-                  Text("Event"),
-                  Text("Subtitle"),
+                  DropdownButton(
+                    items: List.generate(
+                        BFCore().noteOption.setEventKeyOption.length, (index) =>
+                        DropdownMenuItem(
+                            value: BFCore().noteOption.setEventKeyOption.toList()[index],
+                            child: Text(BFCore().noteOption.setEventKeyOption.toList()[index]))),
+                    value: _UIselectedEventKey,
+                    onChanged: (value) {
+                      _UIselectedEventKey = value.toString();
+                    },
+                  ),
+                  DropdownButton(
+                    items: List.generate(
+                        BFCore().noteOption.setSubtitleOption.length, (index) =>
+                        DropdownMenuItem(
+                            value: BFCore().noteOption.setSubtitleOption.toList()[index],
+                            child: Text(BFCore().noteOption.setSubtitleOption.toList()[index]))),
+                    value: _UIselectedSubtitleKey,
+                    onChanged: (value) {
+                      _UIselectedSubtitleKey = value.toString();
+                    },
+                  ),
                 ],
               ),
             ],
@@ -172,8 +195,12 @@ class _testEditorState extends State<testEditor> {
 
   Widget Body() {
     final player = BFCore().notePlayer;
-    double buttonSize = AppData().utilScreen.Screen(context).width * 0.13;
-    double buttonSize1 = AppData().utilScreen.Screen(context).width * 0.08;
+    double buttonSize = AppData().utilScreen
+        .Screen(context)
+        .width * 0.13;
+    double buttonSize1 = AppData().utilScreen
+        .Screen(context)
+        .width * 0.08;
     int ratio_sec = 2;
     int ratio_small = 2;
     int ratio_middle = 3;
@@ -383,7 +410,7 @@ class _testEditorState extends State<testEditor> {
   void update() {
     widget.timer = Timer.periodic(
       Duration(milliseconds: 200),
-      (timer) {
+          (timer) {
         setState(() {});
       },
     );

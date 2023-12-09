@@ -23,9 +23,9 @@ class DataColor{
   var colorBG_Appbar =  Colors.teal[200];
   var colorBG_CommandBar = Colors.green[300];
 
-  var EditorBG_Header = Color(0xFFDCA7B6);
+  var EditorBG_Header = Color(0xFFFF9EB3);
   var EditorBG_Body = Color(0xFF98E187);
-  var EditorBG_Footer = Color(0xFF80A8CC);
+  var EditorBG_Footer = Color(0xFF85C2FF);
 
   var Note_before_Empty = Color(0xFF53D250);
   var Note_before_Filled = Color(0xFF68A1FF);

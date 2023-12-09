@@ -1,17 +1,30 @@
 
 class NoteOption{
 
-  Map mapBgmOption = {
-    "Baki" : "Baki",
-    "Undertale" : "Undertale",
+  Set<String> setBgmOption = {
+    "Baki",
+    "Undertale",
   };
 
   Map<String, String> mapNoteOption = {
     "Normal" : "Normal",
-    "LongTap" : "Long",
+    "Long" : "Long",
   };
 
-  get get_OptionKey_Bgm => mapBgmOption.keys.toList();
+  Set<String> setEventKeyOption = {
+    "EnemyControl",
+    "Explain",
+    "ExplainStop",
+    "JumpNote"
+  };
+
+  Set<String> setSubtitleOption = {
+    "Notice",
+    "CountDown",
+    "EnemySay"
+  };
+
+  get get_OptionKey_Bgm => setBgmOption.toList();
 
   List get_OptionKeys_Note() {
     return mapNoteOption.keys.toList();
