@@ -3,7 +3,7 @@ class NoteOption{
 
   Set<String> setBgmOption = {
     "Baki",
-    "Undertale",
+    "Undertale1",
   };
 
   Map<String, String> mapNoteOption = {
