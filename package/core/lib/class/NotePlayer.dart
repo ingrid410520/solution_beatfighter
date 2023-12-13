@@ -72,6 +72,8 @@ class NotePlayer {
     return value;
   }
 
+  bool check_NoteScriptFromSec(int sec) => mapNoteScript.containsKey(sec);
+
   NoteScript? get_NoteScriptFromSec(int sec) {
     if (mapNoteScript.containsKey(sec)) return mapNoteScript[sec];
   }

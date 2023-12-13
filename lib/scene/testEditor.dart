@@ -31,8 +31,6 @@ class _testEditorState extends State<testEditor> {
 
   String _UIselectedBgm = BFCore().noteOption.get_OptionKey_Bgm[0];
   final _UIselectedNote = ValueNotifier(BFCore().noteOption.get_OptionKeyIndex_Note(0));
-  String _UIselectedEventKey = BFCore().noteOption.setEventKeyOption.toList()[0];
-  String _UIselectedSubtitleKey = BFCore().noteOption.setSubtitleOption.toList()[0];
 
   @override
   void initState() {
@@ -89,27 +87,54 @@ class _testEditorState extends State<testEditor> {
                   ElevatedButton(onPressed: () {}, child: Text("Save")),
                   ElevatedButton(onPressed: () {}, child: Text("Load")),
                   Text("Filename"),
-                  SizedBox(
-                    width: 150,
-                    height: 35,
-                    child: TextField(
-                      controller: teLength,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (value) {
-                        teLength.text = value;
-                      },
-                      decoration: InputDecoration(
-                          label: Text("Note Length"),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  BFCore().notePlayer.set_NoteScriptLength(int.parse(teLength.text));
-                                });
-                              },
-                              icon: Icon(Icons.input))),
-                    ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        height: 35,
+                        child: TextField(
+                          controller: teSeperated,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          onChanged: (value) {
+                            teSeperated.text = value;
+                          },
+                          decoration: InputDecoration(
+                              label: Text("Seperated"),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                              suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      seperated = int.parse(teSeperated.text);
+                                    });
+                                  },
+                                  icon: Icon(Icons.input))),
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      SizedBox(
+                        width: 150,
+                        height: 35,
+                        child: TextField(
+                          controller: teLength,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          onChanged: (value) {
+                            teLength.text = value;
+                          },
+                          decoration: InputDecoration(
+                              label: Text("Note Length"),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                              suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      BFCore().notePlayer.set_NoteScriptLength(int.parse(teLength.text));
+                                    });
+                                  },
+                                  icon: Icon(Icons.input))),
+                        ),
+                      ),
+                    ],
                   ),
                   ElevatedButton(
                       onPressed: () {
@@ -126,28 +151,7 @@ class _testEditorState extends State<testEditor> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  SizedBox(
-                    width: 150,
-                    height: 35,
-                    child: TextField(
-                      controller: teSeperated,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (value) {
-                        teSeperated.text = value;
-                      },
-                      decoration: InputDecoration(
-                          label: Text("Seperated"),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  seperated = int.parse(teSeperated.text);
-                                });
-                              },
-                              icon: Icon(Icons.input))),
-                    ),
-                  ),
+                  Text("Data1"),
                   DropdownButton(
                     items: List.generate(
                         BFCore().noteOption.setBgmOption.length,
@@ -160,32 +164,20 @@ class _testEditorState extends State<testEditor> {
                       _UIselectedBgm = value.toString();
                     },
                   ),
-                  AdvancedSegment(
-                    segments: BFCore().noteOption.mapNoteOption,
-                    controller: _UIselectedNote,
+                  Row(
+                    children: [
+                      AdvancedSegment(
+                        segments: BFCore().noteOption.mapNoteOption,
+                        controller: _UIselectedNote,
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text("Note JudgeTime"),
+                    ],
                   ),
-                  DropdownButton(
-                    items: List.generate(
-                        BFCore().noteOption.setEventKeyOption.length, (index) =>
-                        DropdownMenuItem(
-                            value: BFCore().noteOption.setEventKeyOption.toList()[index],
-                            child: Text(BFCore().noteOption.setEventKeyOption.toList()[index]))),
-                    value: _UIselectedEventKey,
-                    onChanged: (value) {
-                      _UIselectedEventKey = value.toString();
-                    },
-                  ),
-                  DropdownButton(
-                    items: List.generate(
-                        BFCore().noteOption.setSubtitleOption.length, (index) =>
-                        DropdownMenuItem(
-                            value: BFCore().noteOption.setSubtitleOption.toList()[index],
-                            child: Text(BFCore().noteOption.setSubtitleOption.toList()[index]))),
-                    value: _UIselectedSubtitleKey,
-                    onChanged: (value) {
-                      _UIselectedSubtitleKey = value.toString();
-                    },
-                  ),
+                  Text("test"),
+                  Text("All Clear"),
                 ],
               ),
             ],
@@ -230,6 +222,10 @@ class _testEditorState extends State<testEditor> {
                     Note_sec(ratio_sec, buttonSize1, sec, () {
                       _ScrollController.animateTo(getScrollpos(player),
                           duration: Duration(milliseconds: 5), curve: Curves.easeInOut);
+                      if (player.check_NoteScriptFromSec(sec)) {
+                        //player.get_NoteScriptFromSec(sec)!.getInfo();
+                        player.get_NoteScriptFromSec(sec)!.play();
+                      }
                     }),
                     Note_bgm(ratio_middle, buttonSize, sec, () {}),
                     Note_AB(ratio_big, buttonSize, sec, () {
