@@ -13,11 +13,24 @@ enum NotePlayerState {
 }
 
 class NotePlayer {
+  NotePlayer() {
+    playerTimer = Timer.periodic(Duration(milliseconds: 10), (timer) {
+      _update();
+    });
+  }
+
+  void dispose() {
+    if (playerTimer.isActive) playerTimer.cancel();
+  }
+
   NotePlayerState _state = NotePlayerState.Stop;
+  late Timer playerTimer;
   Map<int, NoteScript> mapNoteScript = Map<int, NoteScript>();
   int _noteScriptLength = _initScriptLength;
-  CustomStopwatch timer = CustomStopwatch();
+  CustomStopwatch stopwatchTimer = CustomStopwatch(Duration(milliseconds: _initScriptLength));
   int skiptime = 5000;
+  bool _needInit = false;
+  late int? nextScriptKey;
 
   NotePlayerState get_PlayerState() => _state;
 
@@ -26,12 +39,44 @@ class NotePlayer {
   int get_NoteScriptLength() => _noteScriptLength;
 
   void set_NoteScriptLength(int length) {
-    if (length > 0) _noteScriptLength = length;
+    if (length > 0) {
+      _noteScriptLength = length;
+      stopwatchTimer.set_MaxTime(Duration(milliseconds: _noteScriptLength));
+    }
+    ;
   }
 
-  int get_PlayTime() => timer.elapsedTime.inMilliseconds;
+  void _update() {
+    initCheckScript();
 
-  int get_PlayTime_milliesec() => timer.elapsedTime.inMilliseconds % 1000;
+    switch (_state) {
+      case NotePlayerState.Play:
+        {
+          // script check and excute
+        }
+        break;
+
+      case NotePlayerState.Pause:
+        {
+          //bgm stop
+        }
+        break;
+
+      case NotePlayerState.Stop:
+        {
+          AllScriptInit();
+        }
+        break;
+
+      case NotePlayerState.Complete:
+        {}
+        break;
+    }
+  }
+
+  int get_PlayTime() => stopwatchTimer.elapsedTime.inMilliseconds;
+
+  int get_PlayTime_milliesec() => stopwatchTimer.elapsedTime.inMilliseconds % 1000;
 
   int get_PlayTime_sec() => (get_PlayTime() ~/ 1000) % 60;
 
@@ -57,7 +102,7 @@ class NotePlayer {
     return '$minutesStr:$secondsStr.$millisecondsStr';
   }
 
-  Map get_NoteScript() {
+  Map<int, NoteScript> get_NoteScript() {
     var sortedByKeyMap = Map.fromEntries(mapNoteScript.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
 
     return sortedByKeyMap;
@@ -96,26 +141,68 @@ class NotePlayer {
   void startTimer() {
     if (get_PlayerState() != NotePlayerState.Play) {
       set_PlayerState(NotePlayerState.Play);
-      timer.start();
+      stopwatchTimer.start();
     }
   }
 
   void stopTimer() {
     set_PlayerState(NotePlayerState.Stop);
-    timer.stop();
+    stopwatchTimer.stop();
+    AllScriptInit();
   }
 
   void pauseTimer() {
     set_PlayerState(NotePlayerState.Pause);
-    timer.pause();
+    stopwatchTimer.pause();
   }
 
   void rewindTimer() {
-    timer.rewind(Duration(milliseconds: skiptime));
+    _needInit = true;
+    stopwatchTimer.rewind(Duration(milliseconds: skiptime));
   }
 
   void forwardTimer() {
-    timer.forward(Duration(milliseconds: skiptime));
+    _needInit = true;
+    stopwatchTimer.forward(Duration(milliseconds: skiptime));
+  }
+
+  void initCheckScript() {
+    if (_needInit) {
+      _needInit = false;
+
+      // time & set next Script
+      nextScriptKey = find_NextScriptKey();
+
+      var mapScript = get_NoteScript();
+      mapScript.forEach((key, value) {
+        if (key < stopwatchTimer.get_NowTimeinMilliseconds()) {
+          value.setPlayDoneInit();
+        } else {
+          value.setPlayDone(true);
+        }
+      });
+    }
+  }
+
+  int? find_NextScriptKey() {
+    var result = null;
+    var mapScript = get_NoteScript();
+    var listKeys = mapScript.keys.toList();
+
+    if (listKeys.isNotEmpty) {
+      listKeys.forEach((element) {
+        if (stopwatchTimer.get_NowTimeinMilliseconds() < element) {
+          result = element;
+        }
+      });
+    }
+
+    return result;
+  }
+
+  void AllScriptInit() {
+    var mapScript = get_NoteScript();
+    mapScript.forEach((key, value) => value.setPlayDoneInit());
   }
 
   void changeSkipTime(int _SkipTime) {

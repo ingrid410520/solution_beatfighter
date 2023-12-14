@@ -222,10 +222,10 @@ class _testEditorState extends State<testEditor> {
                     Note_sec(ratio_sec, buttonSize1, sec, () {
                       _ScrollController.animateTo(getScrollpos(player),
                           duration: Duration(milliseconds: 5), curve: Curves.easeInOut);
-                      if (player.check_NoteScriptFromSec(sec)) {
-                        //player.get_NoteScriptFromSec(sec)!.getInfo();
+                      /*if (player.check_NoteScriptFromSec(sec)) {
+                        player.get_NoteScriptFromSec(sec)!.getInfo();
                         player.get_NoteScriptFromSec(sec)!.play();
-                      }
+                      }*/
                     }),
                     Note_bgm(ratio_middle, buttonSize, sec, () {}),
                     Note_AB(ratio_big, buttonSize, sec, () {
