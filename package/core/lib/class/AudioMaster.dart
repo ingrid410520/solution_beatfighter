@@ -22,8 +22,8 @@ class SoundMaster {
 
     do {
       if (mapBgm.containsKey(tempKey)) {
-        tempNumber++;
         tempKey = AudioKey + "(" + tempNumber.toString() + ")";
+        tempNumber++;
       } else {
         mapBgm[tempKey] = AudioStock(audioPathType: Type, path: Path);
         switch (Type) {

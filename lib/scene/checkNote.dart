@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:package_beatfighter/Script/ScriptManager.dart';
+import 'package:package_beatfighter/Script/ScriptStock.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 
 class checkNote extends StatefulWidget {
@@ -11,7 +13,7 @@ class checkNote extends StatefulWidget {
 class _checkNoteState extends State<checkNote> {
   @override
   Widget build(BuildContext context) {
-    var mapScript = BFCore().notePlayer.get_NoteScript();
+    ScriptStock selectScript = BFCore().seletedScript;
     return Container(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -23,20 +25,21 @@ class _checkNoteState extends State<checkNote> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   growable: true,
-                  BFCore().notePlayer.mapNoteScript.length,
+                  BFCore().seletedScript.get_ScriptLength(),
                   (index) {
-                    var key = mapScript.keys.toList()[index];
-                    var result = mapScript.values.toList()[index];
-                    var bgm = result.bgm ?? " - ";
-                    var noteA = result.noteA ?? " - ";
-                    var noteB = result.noteB ?? " - ";
+                    var noteName = selectScript.get_SortedNote().keys.toList()[index];
+                    var noteInfo = selectScript.get_SortedNote().values.toList()[index].get_NoteInfo();
+                    var bgm = noteInfo.bgm ?? " - ";
+                    var noteA = noteInfo.noteA ?? " - ";
+                    var noteB = noteInfo.noteB ?? " - ";
 
-                    return Text("$key : bgm:$bgm / A:$noteA / B:$noteB");
+
+                    return Text("$noteName : bgm:$bgm / A:$noteA / B:$noteB");
                   },
                 )
             ),
           ),
-          Text( BFCore().notePlayer.get_NoteScript().toString()),
+          Text(BFCore().seletedScript.get_ScriptName()),
         ],
       ),
     );

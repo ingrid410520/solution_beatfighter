@@ -1,9 +1,10 @@
 library package_beatfighter;
 
-import 'package:package_beatfighter/class/NoteOption.dart';
-import 'package:package_beatfighter/class/NotePlayer.dart';
-import 'package:package_beatfighter/class/NoteTable.dart';
+import 'package:package_beatfighter/Script/NoteOption.dart';
+import 'package:package_beatfighter/Player/ScriptPlayer.dart';
+import 'package:package_beatfighter/Script/ScriptManager.dart';
 import 'package:package_beatfighter/class/ResourceContainer.dart';
+import 'Script/ScriptStock.dart';
 
 class BFCore {
   BFCore._construct() {}
@@ -13,8 +14,10 @@ class BFCore {
 
   void update() {}
 
-  NoteTable noteTable = NoteTable();
   ResourceContainer resourceContainer = ResourceContainer();
-  NotePlayer notePlayer = NotePlayer();
+  ScriptPlayer scriptPlayer = ScriptPlayer();
   NoteOption noteOption = NoteOption();
+  ScriptManager scriptManager = ScriptManager();
+
+  ScriptStock get seletedScript => scriptManager.get_SelectScript()!;
 }
