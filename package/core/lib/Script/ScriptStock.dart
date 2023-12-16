@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:package_beatfighter/package_beatfighter.dart';
 
-import 'Note.dart';
+import 'package:package_beatfighter/Script/Note.dart';
 
 int _initScriptLength = 5000;
 
@@ -58,6 +56,7 @@ class ScriptStock {
     if (check_NoteFromSec(sec)) {
       bool value = get_NoteFromSec(sec)!.get_NoteInfo().noteA;
       mapNote[sec]!.cover_NoteInfo(NoteInfo(noteA: !value));
+      //get_NoteFromSec(sec)!.cover_NoteInfo(NoteInfo(noteA: !value));
     } else {
       mapNote[sec] = Note(sec: sec, noteInfo: NoteInfo(noteA: true));
     }
@@ -84,6 +83,10 @@ class ScriptStock {
   bool check_NoteFromSec(int sec) => mapNote.containsKey(sec);
 
   Note? get_NoteFromSec(int sec) {
-    if (mapNote.containsKey(sec)) return mapNote[sec];
+    if (check_NoteFromSec(sec)) {
+      return mapNote[sec];
+    } else {
+      return null;
+    }
   }
 }

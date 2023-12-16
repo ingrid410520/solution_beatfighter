@@ -33,11 +33,9 @@ class _checkNoteState extends State<checkNote> {
                     var noteA = noteInfo.noteA ?? " - ";
                     var noteB = noteInfo.noteB ?? " - ";
 
-
                     return Text("$noteName : bgm:$bgm / A:$noteA / B:$noteB");
                   },
-                )
-            ),
+                )),
           ),
           Text(BFCore().seletedScript.get_ScriptName()),
         ],

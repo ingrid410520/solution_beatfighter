@@ -1,8 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 
 class Note {
-  Note({required int sec, required this.noteInfo})
-      : _sec = sec;
+  Note({required int sec, required this.noteInfo}) : _sec = sec;
 
   final int _sec;
   bool playDone = false;
@@ -15,7 +14,10 @@ class Note {
 
   void set_PlayDone(bool value) => playDone = value;
 
-  bool init_PlayDone() => playDone = false;
+  void init_PlayDone() {
+    playDone = false;
+    // bgm check
+  }
 
   void init_NoteInfo() {
     noteInfo.bgm = null;
@@ -28,15 +30,15 @@ class Note {
 
   void cover_NoteInfo(NoteInfo info) {
     if (info.bgm != null) noteInfo.bgm = info.bgm;
-    if (info.noteA) noteInfo.noteA = info.noteA;
-    if (info.noteB) noteInfo.noteB = info.noteB;
+    noteInfo.noteA = info.noteA;
+    noteInfo.noteB = info.noteB;
     if (info.listEvent.isNotEmpty) noteInfo.listEvent = info.listEvent;
     if (info.listSubTitle.isNotEmpty) noteInfo.listSubTitle = info.listSubTitle;
   }
 
   NoteInfo get_NoteInfo() => noteInfo;
 
-  void set_NoteInfo(NoteInfo info){
+  void set_NoteInfo(NoteInfo info) {
     noteInfo = info;
   }
 
@@ -48,19 +50,19 @@ class Note {
   void play_Note() {
     playDone = true;
     if (noteInfo.bgm != null) {
-      print("bgm on");
+      print("$sec - bgm on");
     }
     if (noteInfo.noteA) {
-      print("Note A : $noteInfo.noteA");
+      print("$sec - Note A : ${noteInfo.noteA}");
     }
     if (noteInfo.noteB) {
-      print("Note B : $noteInfo.noteB");
+      print("$sec - Note B : ${noteInfo.noteB}");
     }
     if (noteInfo.listEvent.isNotEmpty) {
-      print("Event($noteInfo.listEvent)");
+      print("$sec - Event(${noteInfo.listEvent})");
     }
     if (noteInfo.listSubTitle.isNotEmpty) {
-      print("Subtitle($noteInfo.listSubTitle)");
+      print("$sec - Subtitle(${noteInfo.listSubTitle})");
     }
   }
 

@@ -1,9 +1,12 @@
 import 'dart:async';
 
-import 'package:package_beatfighter/Player/ScriptPlayer.dart';
-import 'package:package_beatfighter/package_beatfighter.dart';
-
 class CustomStopwatch {
+  CustomStopwatch();
+  factory CustomStopwatch.with_UpdateFunction({required Function() function}) {
+    var inst = CustomStopwatch();
+    inst._clientFunction = function;
+    return inst;
+  }
   void dispose() {
     if (_timer.isActive) _timer.cancel();
   }
@@ -14,6 +17,7 @@ class CustomStopwatch {
   Duration _elapsedTime = Duration.zero;
 
   Duration get elapsedTime => _elapsedTime;
+  Function? _clientFunction;
 
   int get_NowTimeinMilliseconds() => _elapsedTime.inMilliseconds;
 
@@ -64,5 +68,6 @@ class CustomStopwatch {
     final frameTime = now.difference(_previousTime!);
     _elapsedTime += frameTime * _speed; // 수정된 부분
     _previousTime = now;
+    _clientFunction!();
   }
 }

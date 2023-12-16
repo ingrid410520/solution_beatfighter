@@ -1,18 +1,17 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_advanced_segment/flutter_advanced_segment.dart';
-import 'package:package_beatfighter/Player//ScriptPlayer.dart';
-import 'package:package_beatfighter/Script//Note.dart';
+import 'package:package_beatfighter/Script/ScriptStock.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 import 'package:solution_beatfighter/System/AppData.dart';
 import 'package:solution_beatfighter/scene/checkNote.dart';
 
 int seperated = 100;
 TextEditingController teSeperated = TextEditingController(text: seperated.toString());
-TextEditingController teLength = TextEditingController(text: BFCore().scriptManager.get_SelectScript()!.get_ScriptLength().toString());
+TextEditingController teLength =
+    TextEditingController(text: BFCore().scriptManager.get_SelectScript()!.get_ScriptLength().toString());
 
 class testEditor extends StatefulWidget {
   testEditor({super.key});
@@ -155,10 +154,9 @@ class _testEditorState extends State<testEditor> {
                   DropdownButton(
                     items: List.generate(
                         BFCore().noteOption.setBgmOption.length,
-                            (index) =>
-                            DropdownMenuItem(
-                                value: BFCore().noteOption.get_OptionKey_Bgm[index],
-                                child: Text(BFCore().noteOption.get_OptionKey_Bgm[index]))),
+                        (index) => DropdownMenuItem(
+                            value: BFCore().noteOption.get_OptionKey_Bgm[index],
+                            child: Text(BFCore().noteOption.get_OptionKey_Bgm[index]))),
                     value: _UIselectedBgm,
                     onChanged: (value) {
                       _UIselectedBgm = value.toString();
@@ -187,17 +185,13 @@ class _testEditorState extends State<testEditor> {
 
   Widget Body() {
     final script = BFCore().scriptManager.get_SelectScript()!;
-    double buttonSize = AppData().utilScreen
-        .Screen(context)
-        .width * 0.13;
-    double buttonSize1 = AppData().utilScreen
-        .Screen(context)
-        .width * 0.08;
+    double buttonSize = AppData().utilScreen.Screen(context).width * 0.13;
+    double buttonSize1 = AppData().utilScreen.Screen(context).width * 0.08;
     int ratio_sec = 2;
     int ratio_small = 2;
     int ratio_middle = 3;
     int ratio_big = 5;
-    int count = (BFCore().scriptManager.get_SelectScript()!.get_ScriptLength() ~/ seperated).toInt();
+    int count = (BFCore().seletedScript.get_ScriptLength() ~/ seperated).toInt();
     return Expanded(
         flex: ratio_Body,
         child: Container(
@@ -212,20 +206,17 @@ class _testEditorState extends State<testEditor> {
               itemCount: count,
               itemBuilder: (context, index) {
                 int sec = index * seperated;
-                _ScrollController.addListener(() {
+                int secNow = BFCore().scriptPlayer.get_PlayTime();
+                /*_ScrollController.addListener(() {
                   //print('현재 스크롤 위치: ${_ScrollController.offset}');
-                });
+                });*/
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Note_sec(ratio_sec, buttonSize1, sec, () {
-                      _ScrollController.animateTo(getScrollpos(script.get_ScriptLength()),
+                      _ScrollController.animateTo(get_Scrollpos(secNow),
                           duration: Duration(milliseconds: 5), curve: Curves.easeInOut);
-                      /*if (player.check_NoteScriptFromSec(sec)) {
-                        player.get_NoteScriptFromSec(sec)!.getInfo();
-                        player.get_NoteScriptFromSec(sec)!.play();
-                      }*/
                     }),
                     Note_bgm(ratio_middle, buttonSize, sec, () {}),
                     Note_AB(ratio_big, buttonSize, sec, () {
@@ -247,14 +238,15 @@ class _testEditorState extends State<testEditor> {
         ));
   }
 
-  double getScrollpos(int scriptLength) {
+  double get_Scrollpos(int timeNow) {
     double scrollMax = _ScrollController.position.maxScrollExtent;
-    int noteMax = scriptLength;
-    int now = BFCore().scriptPlayer.get_PlayTime();
+    int noteMax = BFCore().seletedScript.get_ScriptLength();
+    int now = timeNow;
 
     double cali = noteMax * 0.01;
-    double pos = (scrollMax * now + cali) / noteMax;
+    double pos = (scrollMax * now + 10) / noteMax;
 
+    //print("scrollMax:$scrollMax - noteMax:$noteMax - now:$now - pos:$pos");
     return pos;
   }
 
@@ -262,13 +254,12 @@ class _testEditorState extends State<testEditor> {
     int time = BFCore().scriptPlayer.get_PlayTime();
     Color colorA = (sec < time) ? AppData().color.Note_after_Empty : AppData().color.Note_before_Empty;
 
-    if (BFCore().scriptPlayer.get_PlayerState() == ScriptPlayerState.Play) {
+    if (BFCore().scriptPlayer.isRun) {
       int cc = sec % 1000;
       if (cc == 0) {
         function();
       }
     }
-
     return Expanded(
         flex: ratio_sec,
         child: Container(
@@ -299,15 +290,17 @@ class _testEditorState extends State<testEditor> {
             )));
   }
 
-  Expanded Note_AB(int ratio_big, double buttonSize, sec, Null functionA(), Null functionB()) {
-    Note? script = BFCore().seletedScript.get_NoteFromSec(sec);
+  Widget Note_AB(int ratio_big, double buttonSize, sec, Null functionA(), Null functionB()) {
+    ScriptStock script = BFCore().seletedScript;
+    var note = script.get_NoteFromSec(sec);
+
     bool checkA = false;
     bool checkB = false;
     int time = BFCore().scriptPlayer.get_PlayTime();
 
-    if (script != null) {
-      if (script.get_NoteInfo().noteA) checkA = true;
-      if (script.get_NoteInfo().noteB) checkB = true;
+    if (note != null) {
+      if (note.get_NoteInfo().noteA) checkA = true;
+      if (note.get_NoteInfo().noteB) checkB = true;
     }
 
     Color colorA = (sec < time)
@@ -381,21 +374,9 @@ class _testEditorState extends State<testEditor> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  OutlinedButton(
-                      onPressed: () {
-                        player.startTimer();
-                      },
-                      child: Text("Play")),
-                  OutlinedButton(
-                      onPressed: () {
-                        player.pauseTimer();
-                      },
-                      child: Text("Pause")),
-                  OutlinedButton(
-                      onPressed: () {
-                        player.stopTimer();
-                      },
-                      child: Text("Stop")),
+                  OutlinedButton(child: const Text("Play"), onPressed: () => player.set_Play()),
+                  OutlinedButton(child: const Text("Pause"), onPressed: () => player.set_Pause()),
+                  OutlinedButton(child: const Text("Stop"), onPressed: () => player.set_Stop()),
                 ],
               )
             ],
@@ -405,8 +386,8 @@ class _testEditorState extends State<testEditor> {
 
   void update() {
     widget.timer = Timer.periodic(
-      Duration(milliseconds: 200),
-          (timer) {
+      Duration(milliseconds: 5),
+      (timer) {
         setState(() {});
       },
     );

@@ -1,7 +1,5 @@
-import 'package:package_beatfighter/Script/Note.dart';
-import 'package:package_beatfighter/package_beatfighter.dart';
 
-import 'ScriptStock.dart';
+import 'package:package_beatfighter/Script/ScriptStock.dart';
 
 class ScriptManager {
   ScriptManager._construct() {
@@ -68,7 +66,7 @@ class ScriptManager {
   ScriptStock? get_SelectScript() {
     if (selectedScriptName == null) return null;
 
-    return mapScriptContainer[selectedScriptName]!;
+    return mapScriptContainer[selectedScriptName];
   }
 
   bool clear_SelectScript() {

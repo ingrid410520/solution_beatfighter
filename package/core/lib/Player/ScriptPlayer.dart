@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:package_beatfighter/Player/CustomStopwatch.dart';
-import 'package:package_beatfighter/Script/Note.dart';
 import 'package:package_beatfighter/Script/ScriptManager.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 
@@ -13,27 +12,72 @@ enum ScriptPlayerState {
 }
 
 class ScriptPlayer {
-  ScriptPlayer() {
-    playerTimer = Timer.periodic(Duration(milliseconds: 10), (timer) {
-      _update();
-    });
-  }
-
   void dispose() {
     if (playerTimer.isActive) playerTimer.cancel();
   }
 
-  CustomStopwatch stopwatchTimer = CustomStopwatch();
-  ScriptPlayerState _state = ScriptPlayerState.Stop;
+  late CustomStopwatch stopwatchTimer = CustomStopwatch.with_UpdateFunction(function: update);
+  ScriptPlayerState _playerState = ScriptPlayerState.Stop;
   late Timer playerTimer;
-
-  int skiptime = 5000;
+  int skipTime = 5000;
   bool _needInit = false;
-  late int? nextScriptKey;
+  late int? nextNoteKey;
 
-  ScriptPlayerState get_PlayerState() => _state;
+  ScriptPlayerState get_PlayerState() => _playerState;
 
-  void set_PlayerState(ScriptPlayerState _State) => _state = _State;
+  bool get isRun {return ScriptPlayerState.Play == get_PlayerState();}
+
+  bool set_Play() {
+    if (get_PlayerState() != ScriptPlayerState.Play) {
+      _playerState = ScriptPlayerState.Play;
+      stopwatchTimer.start();
+      nextNoteKey = find_NextNoteKey();
+      return true;
+    }
+    return false;
+  }
+
+  bool set_Pause() {
+    if (get_PlayerState() == ScriptPlayerState.Play) {
+      _playerState = ScriptPlayerState.Pause;
+      stopwatchTimer.pause();
+      // bgm pause
+      return true;
+    }
+    return false;
+  }
+
+  void set_Stop() {
+    stopwatchTimer.stop();
+    AllNoteInit();
+    _playerState = ScriptPlayerState.Stop;
+  }
+
+  void set_Complete() {
+    _playerState = ScriptPlayerState.Complete;
+    stopwatchTimer.pause();
+    stopwatchTimer.jump(Duration(milliseconds: BFCore().seletedScript.get_ScriptLength()));
+  }
+
+  void rewind({int? time}) {
+    // need check zero
+    _needInit = true;
+    if (time == null) {
+      stopwatchTimer.rewind(Duration(milliseconds: skipTime));
+    } else {
+      stopwatchTimer.rewind(Duration(milliseconds: time));
+    }
+  }
+
+  void forward({int? time}) {
+    // need check complete
+    _needInit = true;
+    if (time == null) {
+      stopwatchTimer.forward(Duration(milliseconds: skipTime));
+    } else {
+      stopwatchTimer.forward(Duration(milliseconds: time));
+    }
+  }
 
   int get_PlayTime() => stopwatchTimer.elapsedTime.inMilliseconds;
 
@@ -63,77 +107,52 @@ class ScriptPlayer {
     return '$minutesStr:$secondsStr.$millisecondsStr';
   }
 
-  void _update() {
-    initCheckScript();
-
-    switch (_state) {
+  void update() {
+    initCheck_Script();
+    switch (_playerState) {
       case ScriptPlayerState.Play:
         {
-          if (BFCore().seletedScript.get_ScriptLength() < stopwatchTimer.get_NowTimeinMilliseconds()) {
-            stopwatchTimer.pause();
-            stopwatchTimer.jump(Duration(milliseconds: BFCore().seletedScript.get_ScriptLength()));
-            _state = ScriptPlayerState.Complete;
+          var script = BFCore().seletedScript;
+          if (script.get_ScriptLength() < stopwatchTimer.get_NowTimeinMilliseconds()) {
+            set_Complete();
           } else {
-            // script check and excute
+            // check NestNote
+            if (nextNoteKey == null) {
+              nextNoteKey = find_NextNoteKey();
+            }
+
+            // Time Check with NextNote
+            if (nextNoteKey != null) {
+              if (nextNoteKey! <= stopwatchTimer.get_NowTimeinMilliseconds()) {
+                var note = script.get_NoteFromSec(nextNoteKey!);
+                note!.play_Note();
+                nextNoteKey = find_NextNoteKey();
+              }
+            }
           }
         }
         break;
-
       case ScriptPlayerState.Pause:
-        {
-          //bgm stop
-        }
+        {}
         break;
-
       case ScriptPlayerState.Stop:
-        {
-          AllNoteInit();
-        }
+        {}
         break;
-
       case ScriptPlayerState.Complete:
         {}
         break;
     }
   }
 
-  void startTimer() {
-    if (get_PlayerState() != ScriptPlayerState.Play) {
-      set_PlayerState(ScriptPlayerState.Play);
-      stopwatchTimer.start();
-    }
-  }
-
-  void stopTimer() {
-    set_PlayerState(ScriptPlayerState.Stop);
-    stopwatchTimer.stop();
-    AllNoteInit();
-  }
-
-  void pauseTimer() {
-    set_PlayerState(ScriptPlayerState.Pause);
-    stopwatchTimer.pause();
-  }
-
-  void rewindTimer() {
-    _needInit = true;
-    stopwatchTimer.rewind(Duration(milliseconds: skiptime));
-  }
-
-  void forwardTimer() {
-    _needInit = true;
-    stopwatchTimer.forward(Duration(milliseconds: skiptime));
-  }
-
-  void initCheckScript() {
+  void initCheck_Script() {
     if (_needInit) {
       _needInit = false;
 
       // time & set next Script
-      nextScriptKey = find_NextNoteKey();
+      nextNoteKey = find_NextNoteKey();
 
-      var mapScript = ScriptManager().get_SelectScript()!.get_SortedNote();
-      mapScript.forEach((key, value) {
+      var mapNote = BFCore().seletedScript.get_SortedNote();
+      mapNote.forEach((key, value) {
         if (key < stopwatchTimer.get_NowTimeinMilliseconds()) {
           value.init_PlayDone();
         } else {
@@ -151,7 +170,7 @@ class ScriptPlayer {
     if (listKeys.isNotEmpty) {
       listKeys.forEach((element) {
         if (stopwatchTimer.get_NowTimeinMilliseconds() < element) {
-          result = element;
+          result ??= element;
         }
       });
     }
@@ -165,6 +184,6 @@ class ScriptPlayer {
   }
 
   void changeSkipTime(int _SkipTime) {
-    if (_SkipTime > 0) skiptime = _SkipTime;
+    if (_SkipTime > 0) skipTime = _SkipTime;
   }
 }
