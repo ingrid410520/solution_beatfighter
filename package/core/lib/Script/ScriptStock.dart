@@ -1,4 +1,3 @@
-
 import 'package:package_beatfighter/Script/Note.dart';
 
 int _initScriptLength = 5000;
@@ -21,7 +20,6 @@ class ScriptStock {
 
   Map<int, Note> get_SortedNote() {
     var sortedByKeyMap = Map.fromEntries(mapNote.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
-
     return sortedByKeyMap;
   }
 

@@ -1,5 +1,8 @@
 
 class NoteOption{
+  NoteOption.construct();
+  static final _inst = NoteOption.construct();
+  factory NoteOption() => _inst;
 
   Set<String> setBgmOption = {
     "Baki",

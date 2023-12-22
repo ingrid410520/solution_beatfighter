@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:package_beatfighter/Script/ScriptManager.dart';
 import 'package:package_beatfighter/Script/ScriptStock.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
+import 'package:solution_beatfighter/System/AppData.dart';
 
 class checkNote extends StatefulWidget {
   const checkNote({super.key});
@@ -18,12 +19,17 @@ class _checkNoteState extends State<checkNote> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Text("Contents"),
           Container(
+            width: AppData().utilScreen.Screen(context).width*0.7,
+            height: AppData().utilScreen.Screen(context).height*0.7,
             color: Colors.blueGrey,
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
+                children: [
+                  Text("Script Name : "+ BFCore().seletedScript.get_ScriptName()),
+                  Text("Contents"),
+                ],
+                /*children: List.generate(
                   growable: true,
                   BFCore().seletedScript.get_ScriptLength(),
                   (index) {
@@ -32,12 +38,11 @@ class _checkNoteState extends State<checkNote> {
                     var bgm = noteInfo.bgm ?? " - ";
                     var noteA = noteInfo.noteA ?? " - ";
                     var noteB = noteInfo.noteB ?? " - ";
-
                     return Text("$noteName : bgm:$bgm / A:$noteA / B:$noteB");
                   },
-                )),
+                )*/),
           ),
-          Text(BFCore().seletedScript.get_ScriptName()),
+
         ],
       ),
     );

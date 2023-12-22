@@ -3,15 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_advanced_segment/flutter_advanced_segment.dart';
+import 'package:package_beatfighter/Script/Note.dart';
 import 'package:package_beatfighter/Script/ScriptStock.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 import 'package:solution_beatfighter/System/AppData.dart';
-import 'package:solution_beatfighter/scene/checkNote.dart';
 
 int seperated = 100;
 TextEditingController teSeperated = TextEditingController(text: seperated.toString());
 TextEditingController teLength =
     TextEditingController(text: BFCore().scriptManager.get_SelectScript()!.get_ScriptLength().toString());
+TextEditingController teInsertEventKey = TextEditingController();
+TextEditingController teInsertEventValue = TextEditingController();
+TextEditingController teInsertSubtitleKey = TextEditingController();
+TextEditingController teInsertSubtitleValue = TextEditingController();
 
 class testEditor extends StatefulWidget {
   testEditor({super.key});
@@ -140,11 +144,12 @@ class _testEditorState extends State<testEditor> {
                         showDialog(
                           context: context,
                           builder: (context) {
-                            return checkNote();
+                            ScriptStock selectScript = BFCore().seletedScript;
+                            return checkScript(context, selectScript);
                           },
                         );
                       },
-                      child: Text("Check Note"))
+                      child: Text("Check Script"))
                 ],
               ),
               Row(
@@ -183,6 +188,56 @@ class _testEditorState extends State<testEditor> {
         ));
   }
 
+  Container checkScript(BuildContext context, ScriptStock selectScript) {
+    return Container(
+      width: AppData().utilScreen.Screen(context).width * 0.5,
+      height: AppData().utilScreen.Screen(context).height * 0.5,
+      child: AlertDialog(
+        title: Text(BFCore().seletedScript.get_ScriptName()),
+        scrollable: true,
+        content: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            selectScript.mapNote.isEmpty == true
+                ? Text("Empty")
+                : Column(
+                    children: List.generate(
+                    selectScript.mapNote.length,
+                    (index) {
+                      var noteSec = selectScript.get_SortedNote().keys.toList()[index];
+                      var noteInfo = selectScript.get_SortedNote().values.toList()[index].get_NoteInfo();
+                      var bgm = noteInfo.bgm ?? " - ";
+                      var noteA = noteInfo.noteA ? "O" : "X";
+                      var noteB = noteInfo.noteB ? "O" : "X";
+                      var eventCount = noteInfo.listEvent.length;
+                      var subtitleCount = noteInfo.listSubTitle.length;
+                      return Text("$noteSec) : bgm:$bgm / A:$noteA B:$noteB / Event:$eventCount Subtitle:$subtitleCount");
+                    },
+                  ))
+          ],
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Go to Test'),
+            onPressed: () {},
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Cancle'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget Body() {
     final script = BFCore().scriptManager.get_SelectScript()!;
     double buttonSize = AppData().utilScreen.Screen(context).width * 0.13;
@@ -191,6 +246,7 @@ class _testEditorState extends State<testEditor> {
     int ratio_small = 2;
     int ratio_middle = 3;
     int ratio_big = 5;
+    int ratio_icon = 1;
     int count = (BFCore().seletedScript.get_ScriptLength() ~/ seperated).toInt();
     return Expanded(
         flex: ratio_Body,
@@ -207,9 +263,6 @@ class _testEditorState extends State<testEditor> {
               itemBuilder: (context, index) {
                 int sec = index * seperated;
                 int secNow = BFCore().scriptPlayer.get_PlayTime();
-                /*_ScrollController.addListener(() {
-                  //print('현재 스크롤 위치: ${_ScrollController.offset}');
-                });*/
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -228,14 +281,295 @@ class _testEditorState extends State<testEditor> {
                         script.reverse_NoteB(sec);
                       });
                     }),
-                    Note_Event(ratio_middle, buttonSize, sec, () {}),
-                    Note_subTitle(ratio_small, sec, () {}),
+                    Note_Event(ratio_middle, buttonSize, sec, () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return popup_insertEvent(script, sec);
+                        },
+                      );
+                    }),
+                    Note_subTitle(ratio_small, sec, () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return popup_insertSubtitle(script, sec);
+                        },
+                      );
+                    }),
+                    Expanded(
+                      flex: ratio_icon,
+                      child: Container(
+                        padding: EdgeInsets.all(5.0),
+                        child: IconButton(
+                          icon: Icon(Icons.close, color: Colors.pink),
+                          onPressed: () {
+                            BFCore().seletedScript.delete_Note(sec);
+                          },
+                        ),
+                      ),
+                    )
                   ],
                 );
               },
             ),
           ),
         ));
+  }
+
+  StatefulBuilder popup_insertEvent(ScriptStock script, int sec) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        var note = script.get_NoteFromSec(sec);
+        int count = 0;
+        NoteInfo? noteInfo = null;
+
+        bool CheckEvent = false;
+
+        if (note != null) {
+          count = note.noteInfo.listEvent.isEmpty ? 0 : note.noteInfo.listEvent.length;
+          noteInfo = note.noteInfo;
+          CheckEvent = noteInfo.listEvent.isNotEmpty;
+        }
+
+        return Container(
+          width: AppData().utilScreen.Screen(context).width * 0.7,
+          height: AppData().utilScreen.Screen(context).height * 0.5,
+          child: AlertDialog(
+            title: Text("Insert Event (Sec:$sec)"),
+            scrollable: true,
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                CheckEvent ? Text("Event Data : ${note!.noteInfo.listEvent.length}") : Text("Empty"),
+                SizedBox(
+                  width: AppData().utilScreen.Screen(context).width * 0.5,
+                  height: AppData().utilScreen.Screen(context).height * 0.5,
+                  child: ListView.builder(
+                    itemCount: count,
+                    itemBuilder: (context, index) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                              style: TextStyle(fontSize: 20),
+                              "$index) ${note!.noteInfo.listEvent[index].eventKey} : ${note!.noteInfo.listEvent[index].eventValue}"),
+                          IconButton(
+                            icon: Icon(Icons.cancel_outlined, color: Colors.pink),
+                            onPressed: () {
+                              setState(() {
+                                BFCore().seletedScript.get_NoteFromSec(sec)?.delete_Event(index);
+                              });
+                            },
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: AppData().utilScreen.Screen(context).width * 0.5,
+                  height: AppData().utilScreen.Screen(context).height * 0.1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: TextField(
+                          controller: teInsertEventKey,
+                          decoration: InputDecoration(
+                            label: Text("Key"),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                          ),
+                          onChanged: (value) {
+                            teInsertEventKey.text = value;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: TextField(
+                          controller: teInsertEventValue,
+                          decoration: InputDecoration(
+                            label: Text("Value"),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                          ),
+                          onChanged: (value) {
+                            teInsertEventValue.text = value;
+                          },
+                        ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('Add'),
+                        onPressed: () {
+                          setState(() {
+                            if (teInsertEventKey.text != "" && teInsertEventValue.text != "") {
+                              EventNote event = EventNote(eventKey: teInsertEventKey.text, eventValue: teInsertEventValue.text);
+                              if (note != null) {
+                                note?.insert_Event(event);
+                              } else {
+                                BFCore().seletedScript.insert_Note(sec, NoteInfo());
+                                BFCore().seletedScript.get_NoteFromSec(sec)?.insert_Event(event);
+                              }
+                              teInsertEventKey.clear();
+                              teInsertEventValue.clear();
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  StatefulBuilder popup_insertSubtitle(ScriptStock script, int sec) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        var note = script.get_NoteFromSec(sec);
+        int count = 0;
+        NoteInfo? noteInfo = null;
+
+        bool checkSubtitle = false;
+
+        if (note != null) {
+          count = note.noteInfo.listSubTitle.isEmpty ? 0 : note.noteInfo.listSubTitle.length;
+          noteInfo = note.noteInfo;
+          checkSubtitle = noteInfo.listSubTitle.isNotEmpty;
+        }
+
+        return Container(
+          width: AppData().utilScreen.Screen(context).width * 0.7,
+          height: AppData().utilScreen.Screen(context).height * 0.5,
+          child: AlertDialog(
+            title: Text("Insert Subtitle (Sec:$sec)"),
+            scrollable: true,
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                checkSubtitle ? Text("Subtitle Data : ${note!.noteInfo.listSubTitle.length}") : Text("Empty"),
+                SizedBox(
+                  width: AppData().utilScreen.Screen(context).width * 0.5,
+                  height: AppData().utilScreen.Screen(context).height * 0.5,
+                  child: ListView.builder(
+                    itemCount: count,
+                    itemBuilder: (context, index) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                              style: TextStyle(fontSize: 20),
+                              "$index) ${note!.noteInfo.listSubTitle[index].key} : ${note!.noteInfo.listSubTitle[index].value}"),
+                          IconButton(
+                            icon: Icon(Icons.cancel_outlined, color: Colors.pink),
+                            onPressed: () {
+                              setState(() {
+                                BFCore().seletedScript.get_NoteFromSec(sec)?.delete_SubTitle(index);
+                              });
+                            },
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: AppData().utilScreen.Screen(context).width * 0.5,
+                  height: AppData().utilScreen.Screen(context).height * 0.1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: TextField(
+                          controller: teInsertSubtitleKey,
+                          decoration: InputDecoration(
+                            label: Text("Key"),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                          ),
+                          onChanged: (value) {
+                            teInsertSubtitleKey.text = value;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: TextField(
+                          controller: teInsertSubtitleValue,
+                          decoration: InputDecoration(
+                            label: Text("Value"),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
+                          ),
+                          onChanged: (value) {
+                            teInsertSubtitleValue.text = value;
+                          },
+                        ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('Add'),
+                        onPressed: () {
+                          setState(() {
+                            if (teInsertSubtitleKey.text != "" && teInsertSubtitleValue.text != "") {
+                              SubTitleNote subtitle =
+                                  SubTitleNote(key: teInsertSubtitleKey.text, value: teInsertSubtitleValue.text);
+                              if (note != null) {
+                                note?.insert_SubTitle(subtitle);
+                              } else {
+                                BFCore().seletedScript.insert_Note(sec, NoteInfo());
+                                BFCore().seletedScript.get_NoteFromSec(sec)?.insert_SubTitle(subtitle);
+                              }
+                              teInsertSubtitleKey.clear();
+                              teInsertSubtitleValue.clear();
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   double get_Scrollpos(int timeNow) {
@@ -334,6 +668,21 @@ class _testEditorState extends State<testEditor> {
   }
 
   Expanded Note_Event(int ratio_middle, double buttonSize, sec, Null function()) {
+    ScriptStock script = BFCore().seletedScript;
+    var note = script.get_NoteFromSec(sec);
+    bool checkA = false;
+    int time = BFCore().scriptPlayer.get_PlayTime();
+
+    if (note != null) {
+      if (note.get_NoteInfo().listEvent.isNotEmpty) {
+        checkA = true;
+      }
+    }
+
+    Color color = (sec < time)
+        ? (checkA ? AppData().color.Note_after_Filled : AppData().color.Note_after_Empty)
+        : (checkA ? AppData().color.Note_before_Filled : AppData().color.Note_before_Empty);
+
     return Expanded(
         flex: ratio_middle,
         child: Container(
@@ -341,12 +690,32 @@ class _testEditorState extends State<testEditor> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(width: buttonSize, child: ElevatedButton(child: Text("Event"), onPressed: function)),
+                SizedBox(
+                    width: buttonSize,
+                    child: ElevatedButton(
+                        style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(color)),
+                        child: Text("Event"),
+                        onPressed: function)),
               ],
             )));
   }
 
   Expanded Note_subTitle(int ratio_small, sec, Null function()) {
+    ScriptStock script = BFCore().seletedScript;
+    var note = script.get_NoteFromSec(sec);
+    bool checkA = false;
+    int time = BFCore().scriptPlayer.get_PlayTime();
+
+    if (note != null) {
+      if (note.get_NoteInfo().listSubTitle.isNotEmpty) {
+        checkA = true;
+      }
+    }
+
+    Color color = (sec < time)
+        ? (checkA ? AppData().color.Note_after_Filled : AppData().color.Note_after_Empty)
+        : (checkA ? AppData().color.Note_before_Filled : AppData().color.Note_before_Empty);
+
     return Expanded(
         flex: ratio_small,
         child: Container(
@@ -354,7 +723,10 @@ class _testEditorState extends State<testEditor> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(child: Text("SubTitle"), onPressed: function),
+                ElevatedButton(
+                    style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(color)),
+                    child: Text("SubTitle"),
+                    onPressed: function),
               ],
             )));
   }

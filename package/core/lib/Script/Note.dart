@@ -108,15 +108,15 @@ class NoteInfo {
 enum EventState { none, hitCheck }
 
 class EventNote {
-  EventNote({required this.eventState, this.listParam});
+  EventNote({required this.eventKey, required this.eventValue});
 
-  final EventState eventState;
-  List? listParam = [];
+  final String eventKey;
+  final String eventValue;
 }
 
 class SubTitleNote {
   SubTitleNote({required this.key, required this.value});
 
-  String key = "";
-  String value = "";
+  final String key;
+  final String value;
 }

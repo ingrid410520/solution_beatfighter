@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:package_beatfighter/Player/CustomStopwatch.dart';
+import 'package:package_beatfighter/Script/Note.dart';
 import 'package:package_beatfighter/Script/ScriptManager.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
 
@@ -12,6 +13,12 @@ enum ScriptPlayerState {
 }
 
 class ScriptPlayer {
+  ScriptPlayer._constructor();
+
+  static final _inst = ScriptPlayer._constructor();
+
+  factory ScriptPlayer() => _inst;
+
   void dispose() {
     if (playerTimer.isActive) playerTimer.cancel();
   }
@@ -22,10 +29,14 @@ class ScriptPlayer {
   int skipTime = 5000;
   bool _needInit = false;
   late int? nextNoteKey;
+  bool _listenOn = false;
+  Note? _listenNote;
 
   ScriptPlayerState get_PlayerState() => _playerState;
 
-  bool get isRun {return ScriptPlayerState.Play == get_PlayerState();}
+  bool get isRun {
+    return ScriptPlayerState.Play == get_PlayerState();
+  }
 
   bool set_Play() {
     if (get_PlayerState() != ScriptPlayerState.Play) {
@@ -49,7 +60,7 @@ class ScriptPlayer {
 
   void set_Stop() {
     stopwatchTimer.stop();
-    AllNoteInit();
+    _AllNoteInit();
     _playerState = ScriptPlayerState.Stop;
   }
 
@@ -108,7 +119,9 @@ class ScriptPlayer {
   }
 
   void update() {
-    initCheck_Script();
+    _initListen();
+
+    _initCheck_Script();
     switch (_playerState) {
       case ScriptPlayerState.Play:
         {
@@ -126,6 +139,7 @@ class ScriptPlayer {
               if (nextNoteKey! <= stopwatchTimer.get_NowTimeinMilliseconds()) {
                 var note = script.get_NoteFromSec(nextNoteKey!);
                 note!.play_Note();
+                _set_ListenOn(note);
                 nextNoteKey = find_NextNoteKey();
               }
             }
@@ -144,7 +158,7 @@ class ScriptPlayer {
     }
   }
 
-  void initCheck_Script() {
+  void _initCheck_Script() {
     if (_needInit) {
       _needInit = false;
 
@@ -178,10 +192,24 @@ class ScriptPlayer {
     return result;
   }
 
-  void AllNoteInit() {
+  void _AllNoteInit() {
     var mapScript = ScriptManager().get_SelectScript()!.get_SortedNote();
     mapScript.forEach((key, value) => value.init_PlayDone());
   }
+
+  void _initListen() {
+    _listenOn = false;
+    _listenNote = null;
+  }
+
+  void _set_ListenOn(Note note){
+    _listenOn = true;
+    _listenNote = note;
+  }
+
+  bool get_ListenOn() => _listenOn;
+
+  Note get_ListenNote() => _listenNote!;
 
   void changeSkipTime(int _SkipTime) {
     if (_SkipTime > 0) skipTime = _SkipTime;
