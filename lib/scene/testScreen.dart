@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:solution_beatfighter/system/AppData.dart';
 
 class testScreen extends StatefulWidget {
   const testScreen({super.key});
@@ -16,8 +17,8 @@ class _testScreenState extends State<testScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Text("Select Menu"),
-          ElevatedButton(onPressed: () { Navigator.pushNamed(context, "testEditor"); }, child: Text("Editor")),
-          ElevatedButton(onPressed: () { Navigator.pushNamed(context, "testPlay"); }, child: Text("Play")),
+          ElevatedButton(onPressed: () { Navigator.pushNamed(context, AppData().dataString.strScreen_Editor); }, child: Text("Editor")),
+          ElevatedButton(onPressed: () { Navigator.pushNamed(context, AppData().dataString.strScreen_Play); }, child: Text("Play")),
           ElevatedButton(onPressed: () { }, child: Text("Config")),
         ],
       ),

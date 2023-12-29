@@ -6,7 +6,7 @@ import 'package:flutter_advanced_segment/flutter_advanced_segment.dart';
 import 'package:package_beatfighter/Script/Note.dart';
 import 'package:package_beatfighter/Script/ScriptStock.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
-import 'package:solution_beatfighter/System/AppData.dart';
+import 'package:solution_beatfighter/system/AppData.dart';
 
 int seperated = 100;
 TextEditingController teSeperated = TextEditingController(text: seperated.toString());
@@ -126,7 +126,7 @@ class _testEditorState extends State<testEditor> {
                             teLength.text = value;
                           },
                           decoration: InputDecoration(
-                              label: Text("Note Length"),
+                              label: Text("Script Length"),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(3)),
                               suffixIcon: IconButton(
                                   onPressed: () {
@@ -199,21 +199,7 @@ class _testEditorState extends State<testEditor> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             selectScript.mapNote.isEmpty == true
-                ? Text("Empty")
-                : Column(
-                    children: List.generate(
-                    selectScript.mapNote.length,
-                    (index) {
-                      var noteSec = selectScript.get_SortedNote().keys.toList()[index];
-                      var noteInfo = selectScript.get_SortedNote().values.toList()[index].get_NoteInfo();
-                      var bgm = noteInfo.bgm ?? " - ";
-                      var noteA = noteInfo.noteA ? "O" : "X";
-                      var noteB = noteInfo.noteB ? "O" : "X";
-                      var eventCount = noteInfo.listEvent.length;
-                      var subtitleCount = noteInfo.listSubTitle.length;
-                      return Text("$noteSec) : bgm:$bgm / A:$noteA B:$noteB / Event:$eventCount Subtitle:$subtitleCount");
-                    },
-                  ))
+                ? Text("Empty") : Text(selectScript.get_ScriptInfo(), textAlign: TextAlign.left,)
           ],
         ),
         actions: [
@@ -221,8 +207,10 @@ class _testEditorState extends State<testEditor> {
             style: TextButton.styleFrom(
               textStyle: Theme.of(context).textTheme.labelLarge,
             ),
-            child: const Text('Go to Test'),
-            onPressed: () {},
+            child: const Text('Go to TestPlay'),
+            onPressed: () {
+              Navigator.pushNamed(context, AppData().dataString.strScreen_Play);
+            },
           ),
           TextButton(
             style: TextButton.styleFrom(

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:package_beatfighter/package_beatfighter.dart';
-import 'package:solution_beatfighter/System/AppData.dart';
-import 'package:solution_beatfighter/scene/checkNote.dart';
 import 'package:solution_beatfighter/scene/testEditor.dart';
+import 'package:solution_beatfighter/scene/testPlay.dart';
 import 'package:solution_beatfighter/scene/testScreen.dart';
+import 'package:solution_beatfighter/system/AppData.dart';
 
 void main() {
   return runApp(MyApp());
@@ -22,12 +21,12 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       color: Colors.black,
       debugShowCheckedModeBanner: false,
-      title: AppData().string.strTitle_SolutionApp,
-      initialRoute: "testEditor",
+      title: AppData().dataString.strTitle_SolutionApp,
+      initialRoute: AppData().dataString.strScreen_Editor,
       routes: {
-        "testScreen" : (context) => testScreen(),
-        "testEditor" : (context) => testEditor(),
-        "testPlay" : (context) => testScreen(),
+        AppData().dataString.strScreen_Home : (context) => testScreen(),
+        AppData().dataString.strScreen_Editor : (context) => testEditor(),
+        AppData().dataString.strScreen_Play : (context) => testPlay(),
       },
     );
   }

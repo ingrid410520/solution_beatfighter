@@ -1,4 +1,4 @@
-
+import 'package:package_beatfighter/Save/SaveManager.dart';
 import 'package:package_beatfighter/Script/ScriptStock.dart';
 
 class ScriptManager {
@@ -74,5 +74,12 @@ class ScriptManager {
     selectedScriptName = null;
     return true;
   }
-}
 
+  void save() {
+    SaveManager().save_fileFromMap(type: SaveType.Script, map: mapScriptContainer);
+  }
+
+  void load() {
+    mapScriptContainer = SaveManager().load_file(type: SaveType.Script);
+  }
+}

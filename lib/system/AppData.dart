@@ -4,23 +4,28 @@ import 'package:solution_beatfighter/System/Util/Util_Screen.dart';
 class AppData {
   AppData._constructor() {}
   static AppData _inst = AppData._constructor();
+
   factory AppData() => _inst;
 
-  DataString string = DataString();
+  DataString dataString = DataString();
   DataColor color = DataColor();
   Util_Screen utilScreen = Util_Screen();
 }
 
-class DataString{
+class DataString {
   String strTitle_SolutionApp = "Solution Beat Fighter";
   String strTitle_Package = "package_beat_fighter";
   String strTitle_Editor = "Note Editor : Beat Fighter";
   String strTitle_GameApp = "Beat Fighter";
+
+  String strScreen_Home = "testScreen";
+  String strScreen_Editor = "testEditor";
+  String strScreen_Play = "testPlay";
 }
 
-class DataColor{
+class DataColor {
   var colorBG_App = Colors.grey[200];
-  var colorBG_Appbar =  Colors.teal[200];
+  var colorBG_Appbar = Colors.teal[200];
   var colorBG_CommandBar = Colors.green[300];
 
   var EditorBG_Header = Color(0xFFFF9EB3);

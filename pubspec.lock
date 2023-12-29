@@ -137,14 +137,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
-  filepicker_windows:
-    dependency: "direct main"
-    description:
-      name: filepicker_windows
-      sha256: da047c72b64abcc0103747c0d6f8f09d68655a5da10ddd6a0d291f8f27f897c9
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.11"
   flame:
     dependency: "direct main"
     description:
