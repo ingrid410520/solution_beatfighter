@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:solution_beatfighter/scene/testEditor.dart';
-import 'package:solution_beatfighter/scene/testPlay.dart';
-import 'package:solution_beatfighter/scene/testScreen.dart';
+import 'package:solution_beatfighter/scene/Editor/testEditor.dart';
+import 'package:solution_beatfighter/scene/Play/testPlay.dart';
+import 'package:solution_beatfighter/scene/testHome.dart';
 import 'package:solution_beatfighter/system/AppData.dart';
 
 void main() {
@@ -24,7 +24,7 @@ class _MyAppState extends State<MyApp> {
       title: AppData().dataString.strTitle_SolutionApp,
       initialRoute: AppData().dataString.strScreen_Editor,
       routes: {
-        AppData().dataString.strScreen_Home : (context) => testScreen(),
+        AppData().dataString.strScreen_Home : (context) => testHome(),
         AppData().dataString.strScreen_Editor : (context) => testEditor(),
         AppData().dataString.strScreen_Play : (context) => testPlay(),
       },

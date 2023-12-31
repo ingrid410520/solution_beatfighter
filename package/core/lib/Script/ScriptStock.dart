@@ -6,11 +6,23 @@ class ScriptStock {
   ScriptStock({required String scriptName, required int length})
       : _scriptName = scriptName,
         _scriptLength = length {}
-  final String _scriptName;
+  String _scriptName;
   int _scriptLength = _initScriptLength;
   Map<int, Note> mapNote = Map<int, Note>();
 
+  Map<String, dynamic> toJson() {
+    return {
+      '_scriptName': _scriptName,
+      '_scriptLength': _scriptLength,
+      'mapNote': mapNote.map((key, value) => MapEntry(key.toString(), value.toJson())),
+    };
+  }
+
   String get_ScriptName() => _scriptName;
+
+  void change_ScriptName(String scriptName) {
+    _scriptName = scriptName;
+  }
 
   int get_ScriptLength() => _scriptLength;
 

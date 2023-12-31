@@ -8,6 +8,13 @@ class Note {
   AudioPlayer? bgmPlayer;
   NoteInfo noteInfo;
 
+  toJson() {
+    return {
+    '_sec': _sec,
+    'NoteInfo': noteInfo.toJSBox(),
+    };
+  }
+
   int get sec => _sec;
 
   bool get_PlayDone() => playDone;
@@ -93,11 +100,21 @@ class Note {
     noteInfo.listSubTitle[index] = _subTitle;
     return true;
   }
+
 }
 
 class NoteInfo {
   NoteInfo({this.bgm, this.noteA = false, this.noteB = false});
 
+  toJSBox(){
+    return {
+      'bgm' : bgm,
+      'noteA' : noteA,
+      'noteB' : noteB,
+      'listEvent' : listSubTitle,
+      'listSubTitle' : listSubTitle,
+    };
+  }
   String? bgm;
   bool noteA;
   bool noteB;

@@ -27,6 +27,7 @@ class DataColor {
   var colorBG_App = Colors.grey[200];
   var colorBG_Appbar = Colors.teal[200];
   var colorBG_CommandBar = Colors.green[300];
+  var colorBG_Popup = Color(0xFFE0EBFF);
 
   var EditorBG_Header = Color(0xFFFF9EB3);
   var EditorBG_Body = Color(0xFF98E187);

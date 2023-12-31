@@ -14,7 +14,7 @@ class ScriptManager {
   Map<String, ScriptStock> mapScriptContainer = Map<String, ScriptStock>();
   String? selectedScriptName;
 
-  void create_ScriptStock({required String scriptName, int scriptLength = 5000}) {
+  String create_ScriptStock({required String scriptName, int scriptLength = 5000}) {
     String tempKey = scriptName;
     int tempNumber = 1;
 
@@ -27,6 +27,8 @@ class ScriptManager {
         break;
       }
     } while (true);
+
+    return tempKey;
   }
 
   ScriptStock? get_ScriptStock(String scriptName) => mapScriptContainer[scriptName];
@@ -79,7 +81,7 @@ class ScriptManager {
     SaveManager().save_fileFromMap(type: SaveType.Script, map: mapScriptContainer);
   }
 
-  void load() {
-    mapScriptContainer = SaveManager().load_file(type: SaveType.Script);
+  Future<void> load() async {
+    mapScriptContainer = (await SaveManager().load_ScriptInfo())!;
   }
 }
