@@ -15,9 +15,8 @@ enum ScriptPlayerState {
 class ScriptPlayer {
   ScriptPlayer._constructor();
 
-  static final _inst = ScriptPlayer._constructor();
-
   factory ScriptPlayer() => _inst;
+  static final _inst = ScriptPlayer._constructor();
 
   void dispose() {
     if (playerTimer.isActive) playerTimer.cancel();
@@ -28,6 +27,7 @@ class ScriptPlayer {
   late Timer playerTimer;
   int skipTime = 5000;
   bool _needInit = false;
+  late int? beforeNoteKey;
   late int? nextNoteKey;
   bool _listenOn = false;
   Note? _listenNote;
@@ -60,7 +60,7 @@ class ScriptPlayer {
 
   void set_Stop() {
     stopwatchTimer.stop();
-    _AllNoteInit();
+    _init_SelectedScript();
     _playerState = ScriptPlayerState.Stop;
   }
 
@@ -119,30 +119,35 @@ class ScriptPlayer {
   }
 
   void update() {
-    _initListen();
-
+    _init_Listen();
     _initCheck_Script();
+
     switch (_playerState) {
       case ScriptPlayerState.Play:
         {
           var script = BFCore().seletedScript;
+
           if (script.get_ScriptLength() < stopwatchTimer.get_NowTimeinMilliseconds()) {
             set_Complete();
           } else {
-            // check NestNote
+            // check NextNote
             if (nextNoteKey == null) {
               nextNoteKey = find_NextNoteKey();
             }
 
-            // Time Check with NextNote
+            // Time Check for NextNote
             if (nextNoteKey != null) {
               if (nextNoteKey! <= stopwatchTimer.get_NowTimeinMilliseconds()) {
+                // Run Scrint, Note
                 var note = script.get_NoteFromSec(nextNoteKey!);
                 note!.play_Note();
                 _set_ListenOn(note);
+                beforeNoteKey = nextNoteKey;
                 nextNoteKey = find_NextNoteKey();
               }
             }
+
+            // Input Check
           }
         }
         break;
@@ -163,6 +168,7 @@ class ScriptPlayer {
       _needInit = false;
 
       // time & set next Script
+      beforeNoteKey = null;
       nextNoteKey = find_NextNoteKey();
 
       var mapNote = BFCore().seletedScript.get_SortedNote();
@@ -192,17 +198,17 @@ class ScriptPlayer {
     return result;
   }
 
-  void _AllNoteInit() {
+  void _init_SelectedScript() {
     var mapScript = ScriptManager().get_SelectScript()!.get_SortedNote();
     mapScript.forEach((key, value) => value.init_PlayDone());
   }
 
-  void _initListen() {
+  void _init_Listen() {
     _listenOn = false;
     _listenNote = null;
   }
 
-  void _set_ListenOn(Note note){
+  void _set_ListenOn(Note note) {
     _listenOn = true;
     _listenNote = note;
   }

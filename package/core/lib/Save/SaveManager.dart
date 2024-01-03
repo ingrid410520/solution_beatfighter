@@ -75,9 +75,15 @@ class SaveManager {
         break;
       case SaveType.Script:
         {
+          Map data = {};
+          map.forEach((key, value) {
+            data[key] = value.toJson();
+          });
+          Map sortedMap = Map.fromEntries(data.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
+
           filePath += "/$strFilename_ScriptInfo";
           File file = File(filePath);
-          file.writeAsString(jsonEncode(map.toString()));
+          file.writeAsString(jsonEncode(sortedMap.toString()));
           print("path : $filePath");
         }
         break;

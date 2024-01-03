@@ -11,7 +11,7 @@ class Note {
   toJson() {
     return {
     '_sec': _sec,
-    'NoteInfo': noteInfo.toJSBox(),
+    'NoteInfo': noteInfo.toJSon(),
     };
   }
 
@@ -106,13 +106,23 @@ class Note {
 class NoteInfo {
   NoteInfo({this.bgm, this.noteA = false, this.noteB = false});
 
-  toJSBox(){
+  toJSon(){
+    Map infoEvent = {};
+    listEvent.forEach((element) {
+      print("${element.eventKey} : ${element.eventValue}");
+      infoEvent[element.eventKey] = element.eventValue;
+    });
+
+    Map infoSubtitle= {};
+    listSubTitle.forEach((element) {
+      infoSubtitle[element.key] = element.value;
+    });
     return {
       'bgm' : bgm,
       'noteA' : noteA,
       'noteB' : noteB,
-      'listEvent' : listSubTitle,
-      'listSubTitle' : listSubTitle,
+      'listEvent' : infoEvent,
+      'listSubTitle' : infoSubtitle,
     };
   }
   String? bgm;
@@ -129,6 +139,14 @@ class EventNote {
 
   final String eventKey;
   final String eventValue;
+
+  toJSBox(){
+    return {
+      'eventKey' : eventKey,
+      'eventValue' : eventValue,
+    };
+  }
+
 }
 
 class SubTitleNote {
@@ -136,4 +154,11 @@ class SubTitleNote {
 
   final String key;
   final String value;
+
+  toJSBox(){
+    return {
+      'key' : key,
+      'value' : value,
+    };
+  }
 }
