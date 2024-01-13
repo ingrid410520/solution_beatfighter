@@ -31,6 +31,23 @@ class ScriptManager {
     return tempKey;
   }
 
+  void cover_ScriptStock({required String scriptName, required int scriptLength, required Map mapNoteInst}) {
+    if (scriptName == 'Base') return;
+
+    ScriptStock inst;
+    if (check_ScriptStock(scriptName)) {
+      inst = get_ScriptStock(scriptName)!;
+      inst.reset_Note();
+    } else {
+      create_ScriptStock(scriptName: scriptName);
+      inst = get_ScriptStock(scriptName)!;
+    }
+
+    print("$scriptName ($scriptLength)");
+    inst.fromJson(mapNoteInst);
+    //stockInst?.fromJson(mapNoteInst);
+  }
+
   ScriptStock? get_ScriptStock(String scriptName) => mapScriptContainer[scriptName];
 
   bool check_ScriptStock(String scriptName) => mapScriptContainer.containsKey(scriptName);
@@ -82,6 +99,9 @@ class ScriptManager {
   }
 
   Future<void> load() async {
-    mapScriptContainer = (await SaveManager().load_ScriptInfo())!;
+    var temp = (await SaveManager().load_ScriptInfo());
+    if (temp != null) {
+      mapScriptContainer = temp!;
+    }
   }
 }

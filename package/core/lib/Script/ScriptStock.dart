@@ -18,6 +18,21 @@ class ScriptStock {
     };
   }
 
+  fromJson(Map mapNote){
+    //print(mapNote);
+    mapNote.forEach((key, value) {
+      int time = int.parse(key);
+      print("noteTime $key : ");
+      print(value);
+      print(value['_sec']);
+      print(value['NoteInfo']);
+      NoteInfo info= NoteInfo();
+      info.fromJson(value['NoteInfo']);
+
+      insert_Note(time, info);
+    });
+  }
+
   String get_ScriptName() => _scriptName;
 
   void change_ScriptName(String scriptName) {
@@ -43,6 +58,10 @@ class ScriptStock {
       mapNote[sec] = inst;
       return true;
     }
+  }
+
+  void reset_Note(){
+    mapNote.clear();
   }
 
   void modify_Note(int sec, NoteInfo info) {

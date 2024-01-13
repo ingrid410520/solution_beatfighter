@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:package_beatfighter/Script/ScriptManager.dart';
 import 'package:package_beatfighter/Script/ScriptStock.dart';
+import 'package:package_beatfighter/package_beatfighter.dart';
 import 'package:path_provider/path_provider.dart';
 
 String strFilename_ConfigInfo = "ConfigInfo.txt";
@@ -77,13 +79,13 @@ class SaveManager {
         {
           Map data = {};
           map.forEach((key, value) {
-            data[key] = value.toJson();
+            if (key != "Base") data[key] = value.toJson();
           });
           Map sortedMap = Map.fromEntries(data.entries.toList()..sort((e1, e2) => e1.key.compareTo(e2.key)));
 
           filePath += "/$strFilename_ScriptInfo";
           File file = File(filePath);
-          file.writeAsString(jsonEncode(sortedMap.toString()));
+          file.writeAsString(jsonEncode(sortedMap));
           print("path : $filePath");
         }
         break;
@@ -135,18 +137,40 @@ class SaveManager {
   }
 
   Future<Map<String, ScriptStock>?> load_ScriptInfo() async {
-    var result = null;
+    Map<String, ScriptStock>? result;
+
     String filePath = await get_PathDocument();
     filePath += "/$strFilename_ScriptInfo";
     File file = File(filePath);
 
     print("path : $filePath");
 
+    // 파일이 있을 경우
     if (await file.exists()) {
-      var load = file.readAsString();
-      print("load Debug\n $load");
-      result = json.decode(load as String);
+      try {
+        String load = await file.readAsString();
+        //print("load Debug : $load");
+
+        Map decodedMap = json.decode(load);
+        //print("decodedMap: ${decodedMap.keys}");
+
+        decodedMap.forEach((key, value) {
+          String scriptName = value['_scriptName'];
+          int scriptLength = value['_scriptLength'];
+          Map noteInst = value['mapNote'];
+
+          //print(scriptName);
+          //print(scriptLength);
+          //print(noteInst);
+          BFCore().scriptManager.cover_ScriptStock(scriptName: scriptName, scriptLength: scriptLength, mapNoteInst: noteInst);
+        });
+      } catch (e) {
+        print("Error decoding JSON: $e");
+      }
+    } else {
+      print("File does not exist");
     }
+
     return result;
   }
 }

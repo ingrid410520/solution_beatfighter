@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:audioplayers/audioplayers.dart';
 
 class Note {
@@ -10,8 +12,8 @@ class Note {
 
   toJson() {
     return {
-    '_sec': _sec,
-    'NoteInfo': noteInfo.toJSon(),
+      '_sec': _sec,
+      'NoteInfo': noteInfo.toJson(),
     };
   }
 
@@ -100,31 +102,52 @@ class Note {
     noteInfo.listSubTitle[index] = _subTitle;
     return true;
   }
-
 }
 
 class NoteInfo {
   NoteInfo({this.bgm, this.noteA = false, this.noteB = false});
 
-  toJSon(){
+  toJson() {
     Map infoEvent = {};
     listEvent.forEach((element) {
-      print("${element.eventKey} : ${element.eventValue}");
       infoEvent[element.eventKey] = element.eventValue;
     });
 
-    Map infoSubtitle= {};
+    Map infoSubtitle = {};
     listSubTitle.forEach((element) {
       infoSubtitle[element.key] = element.value;
     });
     return {
-      'bgm' : bgm,
-      'noteA' : noteA,
-      'noteB' : noteB,
-      'listEvent' : infoEvent,
-      'listSubTitle' : infoSubtitle,
+      'bgm': bgm,
+      'noteA': noteA,
+      'noteB': noteB,
+      'listEvent': infoEvent,
+      'listSubTitle': infoSubtitle,
     };
   }
+
+  fromJson(Map mapInfo) {
+    bgm = mapInfo['bgm'];
+    noteA = mapInfo['noteA'];
+    noteB = mapInfo['noteB'];
+    print(mapInfo['listEvent']);
+    print(mapInfo['instSubTitle']);
+    if (mapInfo['listEvent'] != null) {
+      Map inst = mapInfo['listEvent'];
+      inst.forEach((key, value) {
+        listEvent.add(EventNote(eventKey: key, eventValue: value));
+      });
+    }
+    if (mapInfo['instSubTitle'] != null) {
+      Map inst = mapInfo['instSubTitle'];
+      inst.forEach((key, value) {
+        listEvent.add(EventNote(eventKey: key, eventValue: value));
+      });
+    }
+
+    return this;
+  }
+
   String? bgm;
   bool noteA;
   bool noteB;
@@ -140,13 +163,12 @@ class EventNote {
   final String eventKey;
   final String eventValue;
 
-  toJSBox(){
+  toJSBox() {
     return {
-      'eventKey' : eventKey,
-      'eventValue' : eventValue,
+      'eventKey': eventKey,
+      'eventValue': eventValue,
     };
   }
-
 }
 
 class SubTitleNote {
@@ -155,10 +177,10 @@ class SubTitleNote {
   final String key;
   final String value;
 
-  toJSBox(){
+  toJSBox() {
     return {
-      'key' : key,
-      'value' : value,
+      'key': key,
+      'value': value,
     };
   }
 }
