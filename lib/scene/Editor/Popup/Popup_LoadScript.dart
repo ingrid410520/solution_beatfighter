@@ -7,46 +7,44 @@ StatefulBuilder Popup_LoadScript({VoidCallback? afterFunc}) {
   return StatefulBuilder(
     builder: (context, setStat) {
       return AlertDialog(
-        title: Text("Load Script"),
+        title: const Text("Load Script"),
         scrollable: true,
-        content: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                  width: AppData().utilScreen.Screen(context).width * 0.3,
-                  height: AppData().utilScreen.Screen(context).height * 0.5,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ListView.builder(
-                          itemCount: BFCore().scriptManager.get_ScriptKeys().length,
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            List listScript = BFCore().scriptManager.get_ScriptKeys();
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                              child: ElevatedButton(
-
-                                child: Text("${listScript[index]}"),
-                                onPressed: () {
-                                  BFCore().scriptManager.select_ScriptStock(listScript[index]);
-                                  if (afterFunc != null) {
-                                    afterFunc!();
-                                  }
-                                  setStat;
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            );
+        content: Center(
+          child: SizedBox(
+            width: AppData().utilScreen.Screen(context).width * 0.3,
+            height: AppData().utilScreen.Screen(context).height * 0.5,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
+              child: ListView.builder(
+                itemCount: BFCore().scriptManager.get_ScriptKeys().length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  List listScript = BFCore().scriptManager.get_ScriptKeys();
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 250,
+                        child: ElevatedButton(
+                          child: Text("${listScript[index]}"),
+                          onPressed: () {
+                            BFCore().scriptManager.select_ScriptStock(listScript[index]);
+                            if (afterFunc != null) {
+                              afterFunc!();
+                            }
+                            setStat;
+                            Navigator.of(context).pop();
                           },
-                        )
-                      ],
-                    ),
-                  )),
-            ],
+                        ),
+                      ),
+                      IconButton(onPressed: () {
+                        BFCore().scriptManager.remove_Script(listScript[index]);
+                      }, icon: const Icon(Icons.cancel_outlined))
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
         actions: [

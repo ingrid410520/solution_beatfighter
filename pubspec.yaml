@@ -42,6 +42,7 @@ dependencies:
   flame: ^1.10.1
   #filepicker_windows: ^2.0.11
   flutter_advanced_segment: ^3.0.2
+  provider: ^6.1.1
 
 dev_dependencies:
   flutter_test:

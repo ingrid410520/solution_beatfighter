@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:package_beatfighter/package_beatfighter.dart';
+import 'package:provider/provider.dart';
 import 'package:solution_beatfighter/scene/Editor/testEditor.dart';
 import 'package:solution_beatfighter/scene/Play/testPlay.dart';
 import 'package:solution_beatfighter/scene/testHome.dart';
 import 'package:solution_beatfighter/system/AppData.dart';
 
 void main() {
-  return runApp(MyApp());
+  return BFCore().runBFApp(MyApp(),);
 }
 
 class MyApp extends StatefulWidget {
@@ -24,9 +26,9 @@ class _MyAppState extends State<MyApp> {
       title: AppData().dataString.strTitle_SolutionApp,
       initialRoute: AppData().dataString.strScreen_Editor,
       routes: {
-        AppData().dataString.strScreen_Home : (context) => testHome(),
-        AppData().dataString.strScreen_Editor : (context) => testEditor(),
-        AppData().dataString.strScreen_Play : (context) => testPlay(),
+        AppData().dataString.strScreen_Home: (context) => testHome(),
+        AppData().dataString.strScreen_Editor: (context) => testEditor(),
+        AppData().dataString.strScreen_Play: (context) => testPlay(),
       },
     );
   }

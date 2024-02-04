@@ -1,9 +1,10 @@
 import 'dart:async';
-
+import 'package:flutter/cupertino.dart';
 import 'package:package_beatfighter/Player/CustomStopwatch.dart';
 import 'package:package_beatfighter/Script/Note.dart';
 import 'package:package_beatfighter/Script/ScriptManager.dart';
 import 'package:package_beatfighter/package_beatfighter.dart';
+import 'package:provider/provider.dart';
 
 enum ScriptPlayerState {
   Play,
@@ -138,10 +139,12 @@ class ScriptPlayer {
             // Time Check for NextNote
             if (nextNoteKey != null) {
               if (nextNoteKey! <= stopwatchTimer.get_NowTimeinMilliseconds()) {
-                // Run Scrint, Note
+                // Run Script, Note
                 var note = script.get_NoteFromSec(nextNoteKey!);
                 note!.play_Note();
                 _set_ListenOn(note);
+                Provider.of<NoteNotifier>(BFCore().BFcontext!, listen: false).NoteSet(note); // 여기서 쓰고 싶어
+
                 beforeNoteKey = nextNoteKey;
                 nextNoteKey = find_NextNoteKey();
               }

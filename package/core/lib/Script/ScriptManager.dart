@@ -1,10 +1,12 @@
 import 'package:package_beatfighter/Save/SaveManager.dart';
 import 'package:package_beatfighter/Script/ScriptStock.dart';
 
+String BaseScriptName = "Base";
+
 class ScriptManager {
   ScriptManager._construct() {
-    create_ScriptStock(scriptName: "Base");
-    select_ScriptStock("Base");
+    create_ScriptStock(scriptName: BaseScriptName);
+    select_ScriptStock(BaseScriptName);
   }
 
   static final ScriptManager _inst = ScriptManager._construct();
@@ -32,8 +34,7 @@ class ScriptManager {
   }
 
   void cover_ScriptStock({required String scriptName, required int scriptLength, required Map mapNoteInst}) {
-    if (scriptName == 'Base') return;
-
+    //if (scriptName == BaseScriptName) return;
     ScriptStock inst;
     if (check_ScriptStock(scriptName)) {
       inst = get_ScriptStock(scriptName)!;
@@ -67,10 +68,17 @@ class ScriptManager {
   }
 
   bool remove_Script(String scriptName) {
-    if (mapScriptContainer.containsKey(scriptName)) {
+    if (scriptName == BaseScriptName) return false;
+
+    if (check_ScriptStock(scriptName)) {
+      if (selectedScriptName == scriptName) {
+        if (!check_ScriptStock(BaseScriptName)) create_ScriptStock(scriptName: BaseScriptName);
+        select_ScriptStock(BaseScriptName);
+      }
       mapScriptContainer.remove(scriptName);
       return true;
     }
+
     return false;
   }
 

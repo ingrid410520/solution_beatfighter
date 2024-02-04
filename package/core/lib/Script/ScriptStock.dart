@@ -84,10 +84,11 @@ class ScriptStock {
   String get_ScriptInfo() {
     String result = "${get_ScriptName()}(${get_ScriptLength()})\n";
 
-    if (mapNote.isEmpty) {
+
+    if (get_SortedNote().isEmpty) {
       result += "Empty\n";
     } else {
-      mapNote.forEach((key, value) {
+      get_SortedNote().forEach((key, value) {
         var noteSec = key;
         var bgm = value.noteInfo.bgm ?? " - ";
         var noteA = value.noteInfo.noteA ? "O" : "-";
